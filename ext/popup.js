@@ -23,7 +23,7 @@ function setStatus(msg) {
 
 function setOutput(html) {
 	document.getElementById('output').innerHTML = html;
-    navigator.clipboard.writeText(html);
+	navigator.clipboard.writeText(html);
 }
 
 function getDbKey() {
@@ -68,7 +68,7 @@ async function updateDateSelect() {
 	const sel = document.getElementById('dateSelect');
 	sel.innerHTML = '';
 	if (dates.length === 0) {
-		sel.innerHTML = '<option value="">Sem dados</option>';
+		sel.innerHTML = '<option value="">No data</option>';
 		return;
 	}
 	dates.forEach((d) => {
@@ -100,7 +100,7 @@ document.getElementById('btnExport').addEventListener('click', async () => {
 		encodeURIComponent(JSON.stringify(db, null, 2));
 	const a = document.createElement('a');
 	a.href = dataStr;
-	a.download = `ranking_${document.getElementById('groupSelect').value}.json`;
+	a.download = `leaderboard_${document.getElementById('groupSelect').value}.json`;
 	document.body.appendChild(a);
 	a.click();
 	a.remove();
@@ -119,9 +119,9 @@ document.getElementById('dbImport').addEventListener('change', (event) => {
 			const db = JSON.parse(e.target.result);
 			await saveDB(db);
 			await switchGroup();
-			setStatus('Backup importado com sucesso.');
+			setStatus('Backup imported successfully.');
 		} catch (err) {
-			setStatus('Erro ao importar: Arquivo inválido.');
+			setStatus('Import error: Invalid file.');
 		}
 		event.target.value = '';
 	};
@@ -129,10 +129,14 @@ document.getElementById('dbImport').addEventListener('change', (event) => {
 });
 
 document.getElementById('btnReset').addEventListener('click', async () => {
-	if (confirm('Tem certeza que deseja zerar o ranking deste grupo?')) {
+	if (
+		confirm(
+			'Are you sure you want to reset the leaderboard for this group?',
+		)
+	) {
 		await saveDB({});
 		switchGroup();
-		setStatus('Ranking zerado.');
+		setStatus('Leaderboard reset.');
 	}
 });
 
@@ -144,14 +148,14 @@ async function fetchDiscord(url, token) {
 	return res.json();
 }
 
-document.getElementById('btnComputar').addEventListener('click', () => {
+document.getElementById('btnRecordVotes').addEventListener('click', () => {
 	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
 		const tab = tabs[0];
 		if (!tab.url.includes('discord.com/channels/'))
-			return setStatus('Abra a página do canal no Discord.');
+			return setStatus('Open the Discord channel page.');
 
 		const channelId = tab.url.split('/').pop();
-		setStatus('Extraindo token...');
+		setStatus('Extracting token...');
 
 		chrome.scripting.executeScript(
 			{
@@ -199,9 +203,9 @@ document.getElementById('btnComputar').addEventListener('click', () => {
 			},
 			async (results) => {
 				const token = results && results[0] && results[0].result;
-				if (!token) return setStatus('Falha ao extrair token.');
+				if (!token) return setStatus('Failed to extract token.');
 
-				setStatus('Buscando enquetes...');
+				setStatus('Fetching polls...');
 
 				try {
 					const messages = await fetchDiscord(
@@ -218,8 +222,7 @@ document.getElementById('btnComputar').addEventListener('click', () => {
 							),
 					);
 
-					if (polls.length === 0)
-						return setStatus('Nenhuma enquete encontrada.');
+					if (polls.length === 0) return setStatus('No polls found.');
 
 					const dayVotes = {};
 
@@ -233,7 +236,7 @@ document.getElementById('btnComputar').addEventListener('click', () => {
 
 						if (!category) continue;
 
-						setStatus(`Lendo reações: ${title}...`);
+						setStatus(`Reading reactions: ${title}...`);
 						const userVotes = {};
 
 						for (const rx of msg.reactions || []) {
@@ -277,18 +280,18 @@ document.getElementById('btnComputar').addEventListener('click', () => {
 					await updateDateSelect();
 
 					document.getElementById('dateSelect').value = today;
-					setStatus('Votos computados com sucesso.');
+					setStatus('Votes recorded successfully.');
 				} catch (e) {
-					setStatus('Erro: ' + e.message);
+					setStatus('Error: ' + e.message);
 				}
 			},
 		);
 	});
 });
 
-document.getElementById('btnProcess').addEventListener('click', async () => {
+document.getElementById('btnCalculate').addEventListener('click', async () => {
 	const selectedDate = document.getElementById('dateSelect').value;
-	if (!selectedDate) return setStatus('Nenhuma data selecionada.');
+	if (!selectedDate) return setStatus('No date selected.');
 
 	const answers = {
 		S: parseInt(document.getElementById('correctSize').value),
@@ -299,7 +302,7 @@ document.getElementById('btnProcess').addEventListener('click', async () => {
 
 	const db = await getVotesDB();
 	const rawVotes = db[selectedDate];
-	if (!rawVotes) return setStatus('Dados não encontrados para a data.');
+	if (!rawVotes) return setStatus('Data not found for this date.');
 
 	const scores = {};
 	for (const [id, user] of Object.entries(rawVotes)) {
@@ -318,20 +321,20 @@ document.getElementById('btnProcess').addEventListener('click', async () => {
 		scores,
 		`Contract Board - ${document.getElementById('groupSelect').value}`,
 	);
-	setStatus('Cálculo concluído (Pontuação não salva até Atualizar).');
+	setStatus('Calculation complete (Scores not saved until Update).');
 });
 
 document
-	.getElementById('btnExportarVotos')
+	.getElementById('btnExportVotes')
 	.addEventListener('click', async () => {
 		const selectedDate = document.getElementById('dateSelect').value;
-		if (!selectedDate) return setStatus('Nenhuma data selecionada.');
+		if (!selectedDate) return setStatus('No date selected.');
 
 		const db = await getVotesDB();
 		const rawVotes = db[selectedDate];
-		if (!rawVotes) return setStatus('Dados não encontrados para a data.');
+		if (!rawVotes) return setStatus('Data not found for this date.');
 
-		let exportTxt = `Votos - ${selectedDate} (${document.getElementById('groupSelect').value})\n`;
+		let exportTxt = `Votes - ${selectedDate} (${document.getElementById('groupSelect').value})\n`;
 
 		for (const cat of ['S', 'E', 'T', 'R']) {
 			exportTxt += `\n[ ${CATEGORY_NAMES[cat]} ]\n`;
@@ -354,11 +357,11 @@ document
 		const a = document.createElement('a');
 		a.href =
 			'data:text/plain;charset=utf-8,' + encodeURIComponent(exportTxt);
-		a.download = `votos_${document.getElementById('groupSelect').value}_${selectedDate}.txt`;
+		a.download = `votes_${document.getElementById('groupSelect').value}_${selectedDate}.txt`;
 		document.body.appendChild(a);
 		a.click();
 		a.remove();
-		setStatus('Votos exportados.');
+		setStatus('Votes exported.');
 	});
 
 document
@@ -385,13 +388,13 @@ document
 			db,
 			`${document.getElementById('groupSelect').value} Prediction Leaderboard`,
 		);
-		setStatus('Ranking atualizado!');
+		setStatus('Leaderboard updated!');
 	});
 
 function renderTable(db, titleOverride) {
 	const players = Object.values(db);
 	if (players.length === 0)
-		return setOutput(`## ${titleOverride || 'Leaderboard'}\nNenhum dado.`);
+		return setOutput(`## ${titleOverride || 'Leaderboard'}\nNo data.`);
 
 	players.sort((a, b) => {
 		if (b.Total !== a.Total) return b.Total - a.Total;

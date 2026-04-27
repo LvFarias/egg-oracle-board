@@ -42,18 +42,18 @@
 			button:hover {
 				background: #4e33d4e6;
 			}
-			#btnComputar {
+			#btnRecordVotes {
 				color: #242429;
 				background: #f9b307;
 			}
-			#btnComputar:hover {
+			#btnRecordVotes:hover {
 				background: #b39800e6;
 			}
-			#btnExportarVotos {
+			#btnExportVotes {
 				background: #337ed5;
 				color: #efeff1;
 			}
-			#btnExportarVotos:hover {
+			#btnExportVotes:hover {
 				background: #337ed5e6;
 			}
 			#btnUpdateGlobal {
@@ -112,24 +112,24 @@
 	<body>
 		<div style="display: flex; gap: 10px; margin-bottom: 10px">
 			<div class="form-group" style="flex: 1">
-				<label>Grupo Alvo:</label>
+				<label>Target Group:</label>
 				<select id="groupSelect">
 					<option value="BN">BN</option>
 					<option value="1q">1q</option>
 				</select>
 			</div>
 			<div class="form-group" style="flex: 1">
-				<label>Data dos Votos:</label>
+				<label>Votes Date:</label>
 				<select id="dateSelect"></select>
 			</div>
 		</div>
 
 		<div style="display: flex; gap: 5px">
-			<button id="btnComputar" style="margin-top: 0">
-				Computar Votos
+			<button id="btnRecordVotes" style="margin-top: 0">
+				Record Votes
 			</button>
-			<button id="btnExportarVotos" style="margin-top: 0">
-				Exportar Votos
+			<button id="btnExportVotes" style="margin-top: 0">
+				Export Votes
 			</button>
 		</div>
 
@@ -176,21 +176,19 @@
 			</div>
 		</div>
 
-		<button id="btnProcess">Calcular Contrato Atual</button>
-		<button id="btnUpdateGlobal" style="display: none">
-			Atualizar Ranking Global
-		</button>
+		<button id="btnCalculate">Calculate Current Contract</button>
+		<button id="btnUpdateGlobal">Update Global Leaderboard</button>
 
 		<div class="actions">
-			<button id="btnImport">Importar Ranking</button>
-			<button id="btnExport">Exportar Ranking</button>
+			<button id="btnExport">Export Leaderboard</button>
 			<input
 				type="file"
 				id="dbImport"
 				accept=".json"
 				style="display: none"
 			/>
-			<button id="btnReset">Zerar Ranking</button>
+			<button id="btnImport">Import Leaderboard</button>
+			<button id="btnReset">Reset Leaderboard</button>
 		</div>
 
 		<div id="status" class="status"></div>
