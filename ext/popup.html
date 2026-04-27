@@ -1,0 +1,175 @@
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<style>
+			body {
+                width: 450px;
+				padding: 10px;
+				color: #ecfefd;
+				background: #8a05be;
+				font-family: sans-serif;
+			}
+			.form-group {
+				margin-bottom: 10px;
+			}
+			label {
+				display: block;
+				font-size: 12px;
+				margin-bottom: 3px;
+				font-weight: bold;
+			}
+			input,
+			select {
+				width: 100%;
+				padding: 5px;
+				background: #0e0114;
+				color: #ecfefd;
+				border: 1px solid #0e0114;
+				border-radius: 4px;
+				box-sizing: border-box;
+			}
+			button {
+				width: 100%;
+				background: #0abab5;
+				color: #0e0114;
+				border: none;
+				padding: 8px;
+				cursor: pointer;
+				border-radius: 4px;
+				font-weight: bold;
+				margin-top: 10px;
+			}
+			button:hover {
+				background: #056965;
+			}
+			#btnUpdateGlobal {
+                display: none;
+                color: #ecfefd;
+				background: #25a108;
+			}
+			#btnUpdateGlobal:hover {
+                background: #125304;
+			}
+            #btnExport, #btnImport {
+                color: #ecfefd;
+                background: #10569c;
+            }
+            #btnExport:hover, #btnImport:hover {
+                background: #093056;
+            }
+            #btnReset {
+                color: #ecfefd;
+                background: #6e1610;
+            }
+            #btnReset:hover {
+                background: #3c0c08;
+            }
+			.actions {
+				display: flex;
+				gap: 5px;
+				margin-top: 10px;
+			}
+			.actions button {
+				font-size: 11px;
+				padding: 6px;
+				margin-top: 0;
+			}
+			pre {
+				background: #0e0114;
+				padding: 10px;
+				border-radius: 4px;
+				overflow-x: auto;
+				font-family: monospace;
+				font-size: 11px;
+				white-space: pre-wrap;
+			}
+			.status {
+				font-size: 11px;
+				color: #ba9f1c;
+				margin-top: 5px;
+				text-align: center;
+				height: 14px;
+			}
+		</style>
+	</head>
+	<body>
+		<div style="display: flex; gap: 10px; margin-bottom: 10px">
+			<div class="form-group" style="flex: 0.25">
+				<label>Grupo Alvo:</label>
+				<select id="groupSelect">
+					<option value="BN">BN</option>
+					<option value="1q">1q</option>
+				</select>
+			</div>
+		</div>
+		<div style="display: flex; gap: 5px">
+			<div class="form-group" style="flex: 1">
+				<label>Size:</label
+				><input
+					type="number"
+					id="correctSize"
+					min="0"
+					max="10"
+					value="0"
+				/>
+			</div>
+			<div class="form-group" style="flex: 1">
+				<label>Egg:</label
+				><input
+					type="number"
+					id="correctEgg"
+					min="0"
+					max="10"
+					value="0"
+				/>
+			</div>
+			<div class="form-group" style="flex: 1">
+				<label>Token:</label
+				><input
+					type="number"
+					id="correctToken"
+					min="0"
+					max="10"
+					value="0"
+				/>
+			</div>
+			<div class="form-group" style="flex: 1">
+				<label>Reward:</label
+				><input
+					type="number"
+					id="correctReward"
+					min="0"
+					max="10"
+					value="0"
+				/>
+			</div>
+		</div>
+
+		<button id="btnProcess">Calcular Contrato Atual</button>
+		<button id="btnUpdateGlobal" style="display: none">
+			Atualizar Ranking Global
+		</button>
+
+		<div class="actions">
+			<button id="btnExport">
+				Exportar Backup
+			</button>
+			<input
+				type="file"
+				id="dbImport"
+				accept=".json"
+				style="display: none"
+			/>
+			<button id="btnImport">
+				Importar Backup
+			</button>
+			<button id="btnReset">
+				Zerar Ranking
+			</button>
+		</div>
+
+		<div id="status" class="status"></div>
+		<pre id="output"></pre>
+		<script src="popup.js"></script>
+	</body>
+</html>

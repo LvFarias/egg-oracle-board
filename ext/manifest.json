@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "Oracle Board Calculator",
+  "version": "1.2",
+  "description": "Calcula o ranking de previsões de contratos no Discord.",
+  "permissions": ["activeTab", "scripting", "storage"],
+  "host_permissions": ["*://*.discord.com/*"],
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icon16.png",
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  }
+}
