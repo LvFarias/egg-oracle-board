@@ -3,10 +3,10 @@
 		<meta charset="UTF-8" />
 		<style>
 			body {
-                width: 450px;
+				width: 450px;
 				padding: 10px;
-				color: #ecfefd;
-				background: #8a05be;
+				color: #efeff1;
+				background: #1a1a1e;
 				font-family: sans-serif;
 			}
 			.form-group {
@@ -22,16 +22,16 @@
 			select {
 				width: 100%;
 				padding: 5px;
-				background: #0e0114;
-				color: #ecfefd;
-				border: 1px solid #0e0114;
+				background: #242429;
+				color: #efeff1;
+				border: 1px solid #3b3b41;
 				border-radius: 4px;
 				box-sizing: border-box;
 			}
 			button {
 				width: 100%;
-				background: #0abab5;
-				color: #0e0114;
+				background: #4f33d4;
+				color: #efeff1;
 				border: none;
 				padding: 8px;
 				cursor: pointer;
@@ -40,30 +40,46 @@
 				margin-top: 10px;
 			}
 			button:hover {
-				background: #056965;
+				background: #4e33d4e6;
+			}
+			#btnComputar {
+				color: #242429;
+				background: #f9b307;
+			}
+			#btnComputar:hover {
+				background: #b39800e6;
+			}
+			#btnExportarVotos {
+				background: #337ed5;
+				color: #efeff1;
+			}
+			#btnExportarVotos:hover {
+				background: #337ed5e6;
 			}
 			#btnUpdateGlobal {
-                display: none;
-                color: #ecfefd;
-				background: #25a108;
+				display: none;
+				color: #efeff1;
+				background: #3d9e60;
 			}
 			#btnUpdateGlobal:hover {
-                background: #125304;
+				background: #3d9e60e6;
 			}
-            #btnExport, #btnImport {
-                color: #ecfefd;
-                background: #10569c;
-            }
-            #btnExport:hover, #btnImport:hover {
-                background: #093056;
-            }
-            #btnReset {
-                color: #ecfefd;
-                background: #6e1610;
-            }
-            #btnReset:hover {
-                background: #3c0c08;
-            }
+			#btnExport,
+			#btnImport {
+				color: #efeff1;
+				background: #337ed5;
+			}
+			#btnExport:hover,
+			#btnImport:hover {
+				background: #337ed5e6;
+			}
+			#btnReset {
+				color: #efeff1;
+				background: #d93e44;
+			}
+			#btnReset:hover {
+				background: #d93e44e6;
+			}
 			.actions {
 				display: flex;
 				gap: 5px;
@@ -75,7 +91,8 @@
 				margin-top: 0;
 			}
 			pre {
-				background: #0e0114;
+				color: #dbdbdd;
+				background: #1f202f;
 				padding: 10px;
 				border-radius: 4px;
 				overflow-x: auto;
@@ -85,7 +102,7 @@
 			}
 			.status {
 				font-size: 11px;
-				color: #ba9f1c;
+				color: #ffac34;
 				margin-top: 5px;
 				text-align: center;
 				height: 14px;
@@ -94,15 +111,29 @@
 	</head>
 	<body>
 		<div style="display: flex; gap: 10px; margin-bottom: 10px">
-			<div class="form-group" style="flex: 0.25">
+			<div class="form-group" style="flex: 1">
 				<label>Grupo Alvo:</label>
 				<select id="groupSelect">
 					<option value="BN">BN</option>
 					<option value="1q">1q</option>
 				</select>
 			</div>
+			<div class="form-group" style="flex: 1">
+				<label>Data dos Votos:</label>
+				<select id="dateSelect"></select>
+			</div>
 		</div>
+
 		<div style="display: flex; gap: 5px">
+			<button id="btnComputar" style="margin-top: 0">
+				Computar Votos
+			</button>
+			<button id="btnExportarVotos" style="margin-top: 0">
+				Exportar Votos
+			</button>
+		</div>
+
+		<div style="display: flex; gap: 5px; margin-top: 10px">
 			<div class="form-group" style="flex: 1">
 				<label>Size:</label
 				><input
@@ -151,21 +182,15 @@
 		</button>
 
 		<div class="actions">
-			<button id="btnExport">
-				Exportar Backup
-			</button>
+			<button id="btnImport">Importar Ranking</button>
+			<button id="btnExport">Exportar Ranking</button>
 			<input
 				type="file"
 				id="dbImport"
 				accept=".json"
 				style="display: none"
 			/>
-			<button id="btnImport">
-				Importar Backup
-			</button>
-			<button id="btnReset">
-				Zerar Ranking
-			</button>
+			<button id="btnReset">Zerar Ranking</button>
 		</div>
 
 		<div id="status" class="status"></div>
