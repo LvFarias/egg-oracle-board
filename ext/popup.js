@@ -22,9 +22,113 @@ function setStatus(msg) {
 }
 
 function setOutput(html) {
+	document.getElementById('mainOutputContainer').style.display = 'block';
 	document.getElementById('output').innerHTML = html;
-	navigator.clipboard.writeText(html);
 }
+
+document.getElementById('btnCopyOutput').addEventListener('click', () => {
+	const text = document.getElementById('output').innerText;
+	navigator.clipboard.writeText(text);
+	setStatus('Leaderboard copied to clipboard.');
+});
+
+function shuffleArray(array) {
+	for (let i = array.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[array[i], array[j]] = [array[j], array[i]];
+	}
+	return array;
+}
+
+document.getElementById('btnGeneratePolls').addEventListener('click', () => {
+	const eggs = [
+		':egg_edible:',
+		':egg_superfood:',
+		':egg_medical:',
+		':egg_rocketfuel:',
+		':egg_supermaterial:',
+		':egg_fusion:',
+		':egg_quantum:',
+		':egg_immortality:',
+		':egg_tachyon:',
+		':egg_graviton:',
+		':egg_dilithium:',
+		':egg_pumpkin:',
+		':egg_firework:',
+		':egg_waterballoon:',
+		':egg_easter:',
+		':egg_chocolate:',
+		':egg_wood:',
+		':egg_lithium:',
+		':egg_pegg:',
+		':egg_ice:',
+		':egg_flameretardant:',
+		':egg_silicon:',
+		':egg_carbonfiber:',
+		':egg_unknown:',
+	];
+	shuffleArray(eggs);
+
+	let eggCmd = '/poll create message:Next Egg Forecast ';
+	for (let i = 0; i < 8; i++) {
+		eggCmd += `choice${i + 1}:${eggs[i * 3]} ${eggs[i * 3 + 1]} ${eggs[i * 3 + 2]} `;
+	}
+
+	const sizeTemplates = [
+		['1-2', '3-4', '5-6', '7-8', '9-10', '11-15', '16+'],
+		['1-3', '4-6', '7-9', '10-12', '13-15', '16+'],
+		['1-4', '5-8', '9-16', '17+'],
+		['1-5', '6-10', '11-15', '16+'],
+	];
+	const sizes =
+		sizeTemplates[Math.floor(Math.random() * sizeTemplates.length)];
+	let sizeCmd = '/poll create message:Contract Size Prediction ';
+	sizes.forEach((s, i) => (sizeCmd += `choice${i + 1}:${s} `));
+
+	const tokenTemplates = [
+		['15min', '30min', '60min', '120min', '180min', '240min'],
+		['15min', '30min', '45min', '60min', '90min', '120min'],
+		['15-30min', '45-60min', '90-120min', '180+min'],
+		['15min', '30min', '60min', '90min', '120min', '240min'],
+	];
+	const tokens =
+		tokenTemplates[Math.floor(Math.random() * tokenTemplates.length)];
+	let tokenCmd = '/poll create message:Token Interval Guess ';
+	tokens.forEach((t, i) => (tokenCmd += `choice${i + 1}:${t} `));
+
+	const rewardTemplates = [
+		[
+			'Artifacts',
+			'Piggy Bank (Fill/Level)',
+			'Boosts',
+			'GE / Epic Research',
+			'Soul Eggs',
+			'Shell Tickets',
+		],
+		[
+			'Artifact',
+			'Piggy Level Up',
+			'Piggy Fill',
+			'Boosts / GE',
+			'Soul Eggs / Shell Tickets',
+		],
+		[
+			'Piggy Bank / Soul Eggs',
+			'Beacons / Prisms',
+			'Other Boosts',
+			'Artifacts / Epic Research',
+			'Shell Tickets / GE',
+		],
+	];
+	const rewards =
+		rewardTemplates[Math.floor(Math.random() * rewardTemplates.length)];
+	let rewardCmd = '/poll create message:Final Reward Speculation ';
+	rewards.forEach((r, i) => (rewardCmd += `choice${i + 1}:${r} `));
+
+	document.getElementById('pollOutputContainer').style.display = 'block';
+	document.getElementById('pollOutput').innerText =
+		`${sizeCmd.trim()}\n\n${eggCmd.trim()}\n\n${tokenCmd.trim()}\n\n${rewardCmd.trim()}`;
+});
 
 function getDbKey() {
 	return 'prediction_db_' + document.getElementById('groupSelect').value;
@@ -393,8 +497,10 @@ document
 
 function renderTable(db, titleOverride) {
 	const players = Object.values(db);
-	if (players.length === 0)
-		return setOutput(`## ${titleOverride || 'Leaderboard'}\nNo data.`);
+	if (players.length === 0) {
+		setOutput(`## ${titleOverride || 'Leaderboard'}\nNo data.`);
+		return;
+	}
 
 	players.sort((a, b) => {
 		if (b.Total !== a.Total) return b.Total - a.Total;
@@ -422,6 +528,6 @@ function renderTable(db, titleOverride) {
 		out += ` ${rStr} | ${nStr} | ${p.E} | ${p.R} | ${p.T} | ${p.S} | ${tStr}\n`;
 	}
 	out += `\`\`\``;
-    let legend = `Legend:\n\`\`\`\n(E: Egg | R: Reward | T: Token | S: Size)\n\`\`\``;
+	let legend = `Legend:\n\`\`\`\n(E: Egg | R: Reward | T: Token | S: Size)\n\`\`\``;
 	setOutput(`## ${titleOverride || 'Leaderboard'}\n${out}\n${legend}`);
 }
