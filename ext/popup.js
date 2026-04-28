@@ -197,40 +197,55 @@ async function switchGroup() {
 document.getElementById('groupSelect').addEventListener('change', switchGroup);
 document.addEventListener('DOMContentLoaded', switchGroup);
 
-document.getElementById('btnExport').addEventListener('click', async () => {
-	const db = await loadDB();
-	const dataStr =
-		'data:text/json;charset=utf-8,' +
-		encodeURIComponent(JSON.stringify(db, null, 2));
-	const a = document.createElement('a');
-	a.href = dataStr;
-	a.download = `leaderboard_${document.getElementById('groupSelect').value}.json`;
-	document.body.appendChild(a);
-	a.click();
-	a.remove();
-});
-
 document.getElementById('btnImport').addEventListener('click', () => {
-	document.getElementById('dbImport').click();
+	const importText = document.getElementById('importText');
+	const btnConfirm = document.getElementById('btnConfirmImport');
+	if (importText.style.display === 'none') {
+		importText.style.display = 'block';
+		btnConfirm.style.display = 'block';
+	} else {
+		importText.style.display = 'none';
+		btnConfirm.style.display = 'none';
+	}
 });
 
-document.getElementById('dbImport').addEventListener('change', (event) => {
-	const file = event.target.files[0];
-	if (!file) return;
-	const reader = new FileReader();
-	reader.onload = async function (e) {
-		try {
-			const db = JSON.parse(e.target.result);
-			await saveDB(db);
-			await switchGroup();
-			setStatus('Backup imported successfully.');
-		} catch (err) {
-			setStatus('Import error: Invalid file.');
+document
+	.getElementById('btnConfirmImport')
+	.addEventListener('click', async () => {
+		const text = document.getElementById('importText').value;
+		const lines = text.split('\n');
+		const newDb = {};
+		const regex =
+			/^\s*\d+\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*$/;
+
+		let importedCount = 0;
+		for (const line of lines) {
+			const match = line.match(regex);
+			if (match) {
+				const name = match[1].trim();
+				newDb[name] = {
+					name: name,
+					E: parseInt(match[2], 10),
+					R: parseInt(match[3], 10),
+					T: parseInt(match[4], 10),
+					S: parseInt(match[5], 10),
+					Total: parseInt(match[6], 10),
+				};
+				importedCount++;
+			}
 		}
-		event.target.value = '';
-	};
-	reader.readAsText(file);
-});
+
+		if (importedCount > 0) {
+			await saveDB(newDb);
+			await switchGroup();
+			document.getElementById('importText').value = '';
+			document.getElementById('importText').style.display = 'none';
+			document.getElementById('btnConfirmImport').style.display = 'none';
+			setStatus('Leaderboard imported successfully.');
+		} else {
+			setStatus('Import error: No valid data found.');
+		}
+	});
 
 document.getElementById('btnReset').addEventListener('click', async () => {
 	if (
@@ -313,7 +328,7 @@ document.getElementById('btnRecordVotes').addEventListener('click', () => {
 
 				try {
 					const messages = await fetchDiscord(
-						`/channels/${channelId}/messages?limit=5`,
+						`/channels/${channelId}/messages?limit=10`,
 						token,
 					);
 					const polls = messages.filter(
@@ -352,7 +367,7 @@ document.getElementById('btnRecordVotes').addEventListener('click', () => {
 								: encodeURIComponent(rx.emoji.name);
 							await new Promise((r) => setTimeout(r, 1000));
 							const users = await fetchDiscord(
-								`/channels/${channelId}/messages/${msg.id}/reactions/${emojiEncoded}?limit=50`,
+								`/channels/${channelId}/messages/${msg.id}/reactions/${emojiEncoded}?limit=100`,
 								token,
 							);
 
@@ -475,14 +490,37 @@ document
 		const db = await loadDB();
 
 		for (const [id, score] of Object.entries(currentPendingScores)) {
-			if (!db[id])
-				db[id] = { name: score.name, S: 0, E: 0, T: 0, R: 0, Total: 0 };
-			db[id].name = score.name;
-			db[id].S += score.S;
-			db[id].E += score.E;
-			db[id].T += score.T;
-			db[id].R += score.R;
-			db[id].Total += score.Total;
+			let targetKey = id;
+
+			if (!db[id]) {
+				const existingKey = Object.keys(db).find(
+					(k) => db[k].name === score.name,
+				);
+				if (existingKey) {
+					targetKey = existingKey;
+					if (existingKey !== id) {
+						db[id] = db[existingKey];
+						delete db[existingKey];
+						targetKey = id;
+					}
+				} else {
+					db[id] = {
+						name: score.name,
+						S: 0,
+						E: 0,
+						T: 0,
+						R: 0,
+						Total: 0,
+					};
+				}
+			}
+
+			db[targetKey].name = score.name;
+			db[targetKey].S += score.S;
+			db[targetKey].E += score.E;
+			db[targetKey].T += score.T;
+			db[targetKey].R += score.R;
+			db[targetKey].Total += score.Total;
 		}
 
 		await saveDB(db);
@@ -498,7 +536,9 @@ document
 function renderTable(db, titleOverride) {
 	const players = Object.values(db);
 	if (players.length === 0) {
-		setOutput(`## ${titleOverride || 'Leaderboard'}\nNo data.`);
+		document.getElementById('output').innerHTML =
+			`## ${titleOverride || 'Leaderboard'}\nNo data.`;
+		document.getElementById('mainOutputContainer').style.display = 'block';
 		return;
 	}
 

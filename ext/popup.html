@@ -72,12 +72,10 @@
 			#btnUpdateGlobal:hover {
 				background: #3d9e60e6;
 			}
-			#btnExport,
 			#btnImport {
 				color: #efeff1;
 				background: #337ed5;
 			}
-			#btnExport:hover,
 			#btnImport:hover {
 				background: #337ed5e6;
 			}
@@ -136,6 +134,25 @@
 			}
 			.copy-btn:hover {
 				background: #4f33d4;
+			}
+			#importText {
+				display: none;
+				width: 100%;
+				height: 100px;
+				margin-top: 10px;
+				background: #242429;
+				color: #efeff1;
+				border: 1px solid #3b3b41;
+				border-radius: 4px;
+				padding: 5px;
+				box-sizing: border-box;
+			}
+			#btnConfirmImport {
+				display: none;
+				background: #3d9e60;
+			}
+			#btnConfirmImport:hover {
+				background: #3d9e60e6;
 			}
 		</style>
 	</head>
@@ -219,16 +236,15 @@
 		<button id="btnUpdateGlobal">Update Global Leaderboard</button>
 
 		<div class="actions">
-			<button id="btnExport">Export Leaderboard</button>
-			<input
-				type="file"
-				id="dbImport"
-				accept=".json"
-				style="display: none"
-			/>
 			<button id="btnImport">Import Leaderboard</button>
 			<button id="btnReset">Reset Leaderboard</button>
 		</div>
+
+		<textarea
+			id="importText"
+			placeholder="Paste the leaderboard table here..."
+		></textarea>
+		<button id="btnConfirmImport">Confirm Import</button>
 
 		<div id="status" class="status"></div>
 
