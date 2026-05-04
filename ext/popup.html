@@ -4,6 +4,7 @@
 		<style>
 			body {
 				width: 450px;
+				max-height: 100dvh;
 				padding: 10px;
 				color: #efeff1;
 				background: #1a1a1e;
@@ -49,6 +50,14 @@
 			}
 			#btnGeneratePolls:hover {
 				background: #3d9e60e6;
+			}
+			#btnCopyPingUsers {
+				background: #337ed5;
+				margin-top: 0;
+				margin-bottom: 15px;
+			}
+			#btnCopyPingUsers:hover {
+				background: #337ed5e6;
 			}
 			#btnRecordVotes {
 				color: #242429;
@@ -102,6 +111,7 @@
 				padding: 10px;
 				border-radius: 4px;
 				overflow-x: auto;
+				max-height: 200px;
 				font-family: monospace;
 				font-size: 11px;
 				white-space: pre-wrap;
@@ -157,11 +167,18 @@
 		</style>
 	</head>
 	<body>
-		<button id="btnGeneratePolls">Generate Polls</button>
+		<div style="display: flex; gap: 5px">
+			<button id="btnGeneratePolls" style="margin-top: 0">
+				Generate Polls
+			</button>
+			<button id="btnCopyPingUsers" style="margin-top: 0">
+				Copy Ping-Users
+			</button>
+		</div>
 		<div
 			id="pollOutputContainer"
 			class="output-container"
-			style="display: none; margin-bottom: 15px"
+			style="display: none; margin-bottom: 10px"
 		>
 			<pre id="pollOutput"></pre>
 		</div>

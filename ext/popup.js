@@ -532,6 +532,118 @@ document
 		);
 		setStatus('Leaderboard updated!');
 	});
+document.getElementById('btnCopyPingUsers').addEventListener('click', () => {
+	chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+		const tab = tabs[0];
+		if (!tab.url.includes('discord.com/channels/'))
+			return setStatus('Open the Discord channel page.');
+
+		const channelId = tab.url.split('/').pop();
+		setStatus('Extracting token...');
+
+		chrome.scripting.executeScript(
+			{
+				target: { tabId: tab.id },
+				world: 'MAIN',
+				func: () => {
+					let extractedToken = null;
+					try {
+						window.webpackChunkdiscord_app.push([
+							[Math.random()],
+							{},
+							(req) => {
+								for (const key in req.c) {
+									const m = req.c[key].exports;
+									if (
+										m &&
+										m.default &&
+										typeof m.default.getToken === 'function'
+									) {
+										const t = m.default.getToken();
+										if (
+											typeof t === 'string' &&
+											t.split('.').length === 3
+										) {
+											extractedToken = t;
+											break;
+										}
+									}
+									if (m && typeof m.getToken === 'function') {
+										const t = m.getToken();
+										if (
+											typeof t === 'string' &&
+											t.split('.').length === 3
+										) {
+											extractedToken = t;
+											break;
+										}
+									}
+								}
+							},
+						]);
+					} catch (e) {}
+					return extractedToken;
+				},
+			},
+			async (results) => {
+				const token = results && results[0] && results[0].result;
+				if (!token) return setStatus('Failed to extract token.');
+
+				setStatus('Searching for ping message...');
+
+				try {
+					const messages = await fetchDiscord(
+						`/channels/${channelId}/messages?limit=50`,
+						token,
+					);
+
+					const targetMsg = messages.find(
+						(m) =>
+							m.content &&
+							m.content.includes(
+								'to be pinged every time a new poll becomes available',
+							),
+					);
+
+					if (!targetMsg) return setStatus('Ping message not found.');
+					if (
+						!targetMsg.reactions ||
+						targetMsg.reactions.length === 0
+					)
+						return setStatus('No reactions found.');
+
+					setStatus('Fetching users...');
+					const pingUsers = new Set();
+
+					for (const rx of targetMsg.reactions) {
+						const emojiEncoded = rx.emoji.id
+							? `${rx.emoji.name}:${rx.emoji.id}`
+							: encodeURIComponent(rx.emoji.name);
+
+						await new Promise((r) => setTimeout(r, 1000));
+						const users = await fetchDiscord(
+							`/channels/${channelId}/messages/${targetMsg.id}/reactions/${emojiEncoded}?limit=100`,
+							token,
+						);
+
+						users.forEach((u) => {
+							if (!u.bot) pingUsers.add(`<@${u.id}>`);
+						});
+					}
+
+					if (pingUsers.size === 0)
+						return setStatus('No valid users found.');
+
+					const pingList = Array.from(pingUsers).join(' ');
+					navigator.clipboard.writeText(pingList);
+					setStatus(`${pingUsers.size} users copied to clipboard.`);
+				} catch (e) {
+					setStatus('Error: ' + e.message);
+				}
+			},
+		);
+	});
+});
 
 function renderTable(db, titleOverride) {
 	const players = Object.values(db);
