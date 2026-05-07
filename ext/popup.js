@@ -10,7 +10,7 @@ const EMOJI_MAP = {
 	'9️⃣': 9,
 	'🔟': 10,
 };
-const CATEGORY_NAMES = { S: 'Size', E: 'Egg', T: 'Token', R: 'Reward' };
+const CATEGORY_NAMES = { E: 'Egg', S: 'Size', R: 'Reward', T: 'Token' };
 let currentPendingScores = null;
 
 function formatName(rawName) {
@@ -215,8 +215,13 @@ document
 		const text = document.getElementById('importText').value;
 		const lines = text.split('\n');
 		const newDb = {};
-		const regex =
+		const group = document.getElementById('groupSelect').value;
+		let regex =
 			/^\s*\d+\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*$/;
+		if (group === '1q') {
+			regex =
+				/^\s*\d+\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*$/;
+		}
 
 		let importedCount = 0;
 		for (const line of lines) {
@@ -226,10 +231,10 @@ document
 				newDb[name] = {
 					name: name,
 					E: parseInt(match[2], 10),
-					R: parseInt(match[3], 10),
-					T: parseInt(match[4], 10),
-					S: parseInt(match[5], 10),
-					Total: parseInt(match[6], 10),
+					S: parseInt(match[3], 10),
+					R: group === '1q' ? 0 : parseInt(match[4], 10),
+					T: group === '1q' ? 0 : parseInt(match[5], 10),
+					Total: parseInt(match[group === '1q' ? 4 : 6], 10),
 				};
 				importedCount++;
 			}
@@ -350,8 +355,8 @@ document.getElementById('btnRecordVotes').addEventListener('click', () => {
 						let category = null;
 						if (title.includes('size')) category = 'S';
 						else if (title.includes('egg')) category = 'E';
-						else if (title.includes('token')) category = 'T';
 						else if (title.includes('reward')) category = 'R';
+						else if (title.includes('token')) category = 'T';
 
 						if (!category) continue;
 
@@ -413,10 +418,10 @@ document.getElementById('btnCalculate').addEventListener('click', async () => {
 	if (!selectedDate) return setStatus('No date selected.');
 
 	const answers = {
-		S: parseInt(document.getElementById('correctSize').value),
 		E: parseInt(document.getElementById('correctEgg').value),
-		T: parseInt(document.getElementById('correctToken').value),
+		S: parseInt(document.getElementById('correctSize').value),
 		R: parseInt(document.getElementById('correctReward').value),
+		T: parseInt(document.getElementById('correctToken').value),
 	};
 
 	const db = await getVotesDB();
@@ -425,8 +430,8 @@ document.getElementById('btnCalculate').addEventListener('click', async () => {
 
 	const scores = {};
 	for (const [id, user] of Object.entries(rawVotes)) {
-		scores[id] = { name: user.name, S: 0, E: 0, T: 0, R: 0, Total: 0 };
-		for (const cat of ['S', 'E', 'T', 'R']) {
+		scores[id] = { name: user.name, E: 0, S: 0, R: 0, T: 0, Total: 0 };
+		for (const cat of Object.keys(CATEGORY_NAMES)) {
 			if (user[cat] && user[cat] !== 'DQ' && user[cat] === answers[cat]) {
 				scores[id][cat] = 1;
 				scores[id].Total += 1;
@@ -455,7 +460,7 @@ document
 
 		let exportTxt = `Votes - ${selectedDate} (${document.getElementById('groupSelect').value})\n`;
 
-		for (const cat of ['S', 'E', 'T', 'R']) {
+		for (const cat of Object.keys(CATEGORY_NAMES)) {
 			exportTxt += `\n[ ${CATEGORY_NAMES[cat]} ]\n`;
 			const options = {};
 			for (let i = 1; i <= 10; i++) options[i] = [];
@@ -506,20 +511,20 @@ document
 				} else {
 					db[id] = {
 						name: score.name,
-						S: 0,
 						E: 0,
-						T: 0,
+						S: 0,
 						R: 0,
+						T: 0,
 						Total: 0,
 					};
 				}
 			}
 
 			db[targetKey].name = score.name;
-			db[targetKey].S += score.S;
 			db[targetKey].E += score.E;
-			db[targetKey].T += score.T;
+			db[targetKey].S += score.S;
 			db[targetKey].R += score.R;
+			db[targetKey].T += score.T;
 			db[targetKey].Total += score.Total;
 		}
 
@@ -646,6 +651,7 @@ document.getElementById('btnCopyPingUsers').addEventListener('click', () => {
 });
 
 function renderTable(db, titleOverride) {
+	const group = document.getElementById('groupSelect').value;
 	const players = Object.values(db);
 	if (players.length === 0) {
 		document.getElementById('output').innerHTML =
@@ -657,9 +663,9 @@ function renderTable(db, titleOverride) {
 	players.sort((a, b) => {
 		if (b.Total !== a.Total) return b.Total - a.Total;
 		if (b.E !== a.E) return b.E - a.E;
+		if (b.S !== a.S) return b.S - a.S;
 		if (b.R !== a.R) return b.R - a.R;
 		if (b.T !== a.T) return b.T - a.T;
-		if (b.S !== a.S) return b.S - a.S;
 		return a.name.localeCompare(b.name);
 	});
 
@@ -667,19 +673,25 @@ function renderTable(db, titleOverride) {
 	players.forEach((p) => {
 		if (p.name.length > maxNameLen) maxNameLen = p.name.length;
 	});
+	let categories = Object.keys(CATEGORY_NAMES);
+	let borderLen = 31;
 
+	if (group === '1q') {
+		borderLen = 23;
+		categories = categories.slice(0, 2);
+	}
 	let out = `\`\`\`\n`;
-	out += `  # | Player${' '.repeat(maxNameLen - 6)} | E | R | T | S | Total\n`;
-	out += `—`.repeat(maxNameLen + 31) + `\n`;
+	out += `  # | Player${' '.repeat(maxNameLen - 6)} | ${categories.join(' | ')} | Total\n`;
+	out += `—`.repeat(maxNameLen + borderLen) + `\n`;
 
 	for (let i = 0; i < players.length; i++) {
 		const p = players[i];
 		const rStr = String(i + 1).padStart(2, ' ');
 		const nStr = p.name.padEnd(maxNameLen, ' ');
 		const tStr = String(p.Total).padStart(3, ' ');
-		out += ` ${rStr} | ${nStr} | ${p.E} | ${p.R} | ${p.T} | ${p.S} | ${tStr}\n`;
+		out += ` ${rStr} | ${nStr} | ${categories.map((c) => p[c]).join(' | ')} | ${tStr}\n`;
 	}
 	out += `\`\`\``;
-	let legend = `Legend:\n\`\`\`\n(E: Egg | R: Reward | T: Token | S: Size)\n\`\`\``;
+	let legend = `Legend:\n\`\`\`\n(${categories.map((c) => c + ': ' + CATEGORY_NAMES[c]).join(' | ')})\n\`\`\``;
 	setOutput(`## ${titleOverride || 'Leaderboard'}\n${out}\n${legend}`);
 }
