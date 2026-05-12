@@ -120,9 +120,6 @@ document
 		const weekData = db.weeks[week];
 		const rawVotes = weekData.votes;
 
-		if (!rawVotes || Object.keys(rawVotes).length === 0)
-			return setStatus(`No votes found for Week ${week}.`);
-
 		const polls = { egg: {}, size: {}, reward: {}, token: {} };
 		if (weekData.polls) {
 			const lines = weekData.polls.split('\n');
