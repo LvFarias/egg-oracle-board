@@ -169,6 +169,7 @@ document
 				reward: ans.R || 0,
 				token: ans.T || 0,
 			},
+			scores: weekData.scores || {},
 			votes: { egg: {}, size: {}, reward: {}, token: {} },
 		};
 

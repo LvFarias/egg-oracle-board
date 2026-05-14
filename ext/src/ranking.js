@@ -17,7 +17,7 @@ function renderTable(playersList, titleOverride) {
 		return a.name.localeCompare(b.name);
 	});
 
-	let categories = Object.keys(window.CATEGORY_NAMES); // E, S, R, T
+	let categories = Object.keys(window.CATEGORY_NAMES);
 	if (group === '1q') {
 		categories = ['E', 'S'];
 	}
@@ -79,9 +79,9 @@ function renderGlobal(db) {
 	for (let w = 1; w <= 13; w++) {
 		const weekScores = db.weeks[w].scores || {};
 		for (const [id, score] of Object.entries(weekScores)) {
-			const nameKey = score.name.toLowerCase();
-			if (!currScores[nameKey]) {
-				currScores[nameKey] = {
+			if (!currScores[id]) {
+				currScores[id] = {
+					id: id,
 					name: score.name,
 					E: 0,
 					S: 0,
@@ -91,25 +91,30 @@ function renderGlobal(db) {
 					latestWeekTotal: 0,
 				};
 			}
-			currScores[nameKey].E += score.E || 0;
-			currScores[nameKey].S += score.S || 0;
-			currScores[nameKey].R += score.R || 0;
-			currScores[nameKey].T += score.T || 0;
-			currScores[nameKey].Total += score.Total || 0;
+
+			if (score.name.length > currScores[id].name.length) {
+				currScores[id].name = score.name;
+			}
+
+			currScores[id].E += score.E || 0;
+			currScores[id].S += score.S || 0;
+			currScores[id].R += score.R || 0;
+			currScores[id].T += score.T || 0;
+			currScores[id].Total += score.Total || 0;
 
 			if (w < latestWeek) {
-				if (!prevScores[nameKey]) {
-					prevScores[nameKey] = { Total: 0, E: 0, S: 0, R: 0, T: 0 };
+				if (!prevScores[id]) {
+					prevScores[id] = { Total: 0, E: 0, S: 0, R: 0, T: 0 };
 				}
-				prevScores[nameKey].E += score.E || 0;
-				prevScores[nameKey].S += score.S || 0;
-				prevScores[nameKey].R += score.R || 0;
-				prevScores[nameKey].T += score.T || 0;
-				prevScores[nameKey].Total += score.Total || 0;
+				prevScores[id].E += score.E || 0;
+				prevScores[id].S += score.S || 0;
+				prevScores[id].R += score.R || 0;
+				prevScores[id].T += score.T || 0;
+				prevScores[id].Total += score.Total || 0;
 			} else if (w === latestWeek) {
-				currScores[nameKey].latestWeekTotal = score.Total || 0;
-				if (currScores[nameKey].latestWeekTotal > maxLatestWeekTotal) {
-					maxLatestWeekTotal = currScores[nameKey].latestWeekTotal;
+				currScores[id].latestWeekTotal = score.Total || 0;
+				if (currScores[id].latestWeekTotal > maxLatestWeekTotal) {
+					maxLatestWeekTotal = currScores[id].latestWeekTotal;
 				}
 			}
 		}
@@ -127,20 +132,25 @@ function renderGlobal(db) {
 	const currArr = Object.values(currScores).sort(sortFn);
 	currArr.forEach((p, idx) => (p.currRank = idx + 1));
 
-	const prevArr = Object.entries(currScores)
-		.map(([k, p]) => {
-			const prev = prevScores[k] || { Total: 0, E: 0, S: 0, R: 0, T: 0 };
-			return { nameKey: k, name: p.name, ...prev };
+	const prevArr = Object.values(currScores)
+		.map((p) => {
+			const prev = prevScores[p.id] || {
+				Total: 0,
+				E: 0,
+				S: 0,
+				R: 0,
+				T: 0,
+			};
+			return { id: p.id, name: p.name, ...prev };
 		})
 		.sort(sortFn);
 
 	const prevRanks = {};
-	prevArr.forEach((p, idx) => (prevRanks[p.nameKey] = idx + 1));
+	prevArr.forEach((p, idx) => (prevRanks[p.id] = idx + 1));
 
 	currArr.forEach((p) => {
-		const nameKey = p.name.toLowerCase();
-		const oldRank = prevRanks[nameKey];
-		const prev = prevScores[nameKey] || {
+		const oldRank = prevRanks[p.id];
+		const prev = prevScores[p.id] || {
 			Total: 0,
 			E: 0,
 			S: 0,

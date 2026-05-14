@@ -13,33 +13,65 @@ function initWeekSelect() {
 
 async function updateUIForSelectedWeek() {
 	const db = await loadDB();
-	const week = document.getElementById('weekSelect').value;
-	const weekData = db.weeks[week] || {};
+	const selectedWeek = parseInt(document.getElementById('weekSelect').value);
+	const currentWeek = getCurrentWeek();
+	const weekData = db.weeks[selectedWeek] || {};
 	const ans = weekData.answers || {};
 
-	// Preenche os inputs com as respostas salvas
 	document.getElementById('correctSize').value = ans.S || 0;
 	document.getElementById('correctEgg').value = ans.E || 0;
 	document.getElementById('correctReward').value = ans.R || 0;
 	document.getElementById('correctToken').value = ans.T || 0;
 
-	// Se houver polls salvas, mostra; se não, limpa
 	if (weekData.polls) {
 		document.getElementById('pollOutputContainer').style.display = 'block';
 		document.getElementById('pollOutput').innerText = weekData.polls;
 	} else {
 		document.getElementById('pollOutputContainer').style.display = 'none';
 	}
-	
-	// Esconde o botão de update global até um novo cálculo ser feito
+
 	document.getElementById('btnUpdateGlobal').style.display = 'none';
-	
-	// Renderiza o ranking da semana se já houver scores salvos, senão renderiza o global
-	if (weekData.scores && Object.keys(weekData.scores).length > 0) {
-		const groupName = document.getElementById('groupSelect').value;
-		renderTable(Object.values(weekData.scores), `${groupName} Contract Board - Week ${week}`);
-	} else {
+	const groupName = document.getElementById('groupSelect').value;
+
+	if (selectedWeek === currentWeek) {
 		renderGlobal(db);
+		setStatus('');
+	} else {
+		if (weekData.scores && Object.keys(weekData.scores).length > 0) {
+			renderTable(
+				Object.values(weekData.scores),
+				`${groupName} Contract Board - Week ${selectedWeek}`,
+			);
+			setStatus('');
+		} else {
+			let foundWeek = -1;
+			for (let i = selectedWeek - 1; i >= 1; i--) {
+				if (
+					db.weeks[i] &&
+					db.weeks[i].scores &&
+					Object.keys(db.weeks[i].scores).length > 0
+				) {
+					foundWeek = i;
+					break;
+				}
+			}
+
+			if (foundWeek !== -1) {
+				renderTable(
+					Object.values(db.weeks[foundWeek].scores),
+					`${groupName} Contract Board - Week ${foundWeek}`,
+				);
+				setStatus(
+					`Displaying Week ${foundWeek} ranking (latest retroactive data found).`,
+				);
+			} else {
+				document.getElementById('mainOutputContainer').style.display =
+					'none';
+				setStatus(
+					'No scores available for this or previous weeks.',
+				);
+			}
+		}
 	}
 }
 
@@ -56,7 +88,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 document.getElementById('groupSelect').addEventListener('change', switchGroup);
-document.getElementById('weekSelect').addEventListener('change', updateUIForSelectedWeek);
+document
+	.getElementById('weekSelect')
+	.addEventListener('change', updateUIForSelectedWeek);
 
 document.getElementById('seasonName').addEventListener('change', async (e) => {
 	const db = await loadDB();

@@ -1,7 +1,7 @@
 document.getElementById('btnImport').addEventListener('click', () => {
 	const importText = document.getElementById('importText');
 	const btnConfirm = document.getElementById('btnConfirmImport');
-	if (importText.style.display === 'none') {
+	if (importText.style.display !== 'block') {
 		importText.style.display = 'block';
 		btnConfirm.style.display = 'block';
 	} else {
@@ -122,12 +122,46 @@ document
 					/^\s*\d+\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*$/;
 			}
 
+			const db = await loadDB();
+			const findExistingId = (searchName) => {
+				const lowerSearch = searchName.toLowerCase();
+				for (let w = 1; w <= 13; w++) {
+					const lists = [
+						Object.entries(db.weeks[w].votes || {}),
+						Object.entries(db.weeks[w].scores || {}),
+					];
+					for (const list of lists) {
+						for (const [id, user] of list) {
+							if (!user.name) continue;
+							const lowerUser = user.name.toLowerCase();
+							if (
+								(lowerUser.includes(lowerSearch) ||
+									lowerSearch.includes(lowerUser)) &&
+								Math.min(
+									lowerUser.length,
+									lowerSearch.length,
+								) >= 6
+							) {
+								return id;
+							}
+						}
+					}
+				}
+				return null;
+			};
+
+			let tempCounter = Date.now();
 			for (const line of lines) {
 				const cleanLine = stripAnsi(line);
 				const match = cleanLine.match(regex);
 				if (match) {
 					const name = match[1].trim();
-					newScores[name] = {
+					let resolvedId = findExistingId(name);
+					if (!resolvedId) {
+						resolvedId = `no_discord_${tempCounter++}`;
+					}
+
+					newScores[resolvedId] = {
 						name: name,
 						E: parseInt(match[2], 10),
 						S: parseInt(match[3], 10),
@@ -140,7 +174,6 @@ document
 			}
 
 			if (importedCount > 0) {
-				const db = await loadDB();
 				const week = document.getElementById('weekSelect').value;
 				db.weeks[week].scores = newScores;
 				await saveDB(db);

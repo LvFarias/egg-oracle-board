@@ -3,9 +3,9 @@ function getDbKey() {
 }
 
 function normalizeDatabaseUsers(db) {
-	const idMap = {};
+	const realIdMap = {};
 	const fullNameMap = {};
-	const stringAliases = {};
+	const keyRedirects = {};
 
 	for (let w = 1; w <= 13; w++) {
 		const items = [
@@ -14,65 +14,73 @@ function normalizeDatabaseUsers(db) {
 		];
 		items.forEach((list) => {
 			for (const [key, data] of list) {
+				if (!data.name) continue;
 				if (/^\d{17,20}$/.test(key)) {
 					const lower = data.name.toLowerCase();
-					idMap[lower] = key;
+					realIdMap[lower] = key;
 					if (
 						!fullNameMap[key] ||
 						data.name.length > fullNameMap[key].length
 					) {
 						fullNameMap[key] = data.name;
 					}
-				} else {
-					const lower = data.name.toLowerCase();
-					if (!stringAliases[lower]) stringAliases[lower] = data.name;
-					else if (data.name.length > stringAliases[lower].length)
-						stringAliases[lower] = data.name;
 				}
 			}
 		});
 	}
 
-	const resolveKey = (oldKey, oldName) => {
-		if (/^\d{17,20}$/.test(oldKey)) return oldKey;
-		const oldLower = oldName.toLowerCase();
+	let noDiscordCounter = 1;
+	for (let w = 1; w <= 13; w++) {
+		const items = [
+			Object.entries(db.weeks[w].votes || {}),
+			Object.entries(db.weeks[w].scores || {}),
+		];
+		items.forEach((list) => {
+			for (const [key, data] of list) {
+				if (!data.name || /^\d{17,20}$/.test(key)) continue;
 
-		for (const [knownNameLower, knownId] of Object.entries(idMap)) {
-			if (
-				(knownNameLower.startsWith(oldLower) ||
-					oldLower.startsWith(knownNameLower)) &&
-				Math.min(knownNameLower.length, oldLower.length) >= 8
-			) {
-				return knownId;
-			}
-		}
+				let matchedId = null;
+				const oldLower = data.name.toLowerCase();
 
-		let bestStringKey = oldKey;
-		let bestLen = oldName.length;
-		for (const [knownLower, knownName] of Object.entries(stringAliases)) {
-			if (
-				(knownLower.startsWith(oldLower) ||
-					oldLower.startsWith(knownLower)) &&
-				Math.min(knownLower.length, oldLower.length) >= 8
-			) {
-				if (knownName.length > bestLen) {
-					bestStringKey = knownName;
-					bestLen = knownName.length;
+				for (const [knownLower, knownId] of Object.entries(realIdMap)) {
+					if (
+						(knownLower.includes(oldLower) ||
+							oldLower.includes(knownLower)) &&
+						Math.min(knownLower.length, oldLower.length) >= 6
+					) {
+						matchedId = knownId;
+						break;
+					}
+				}
+
+				if (matchedId) {
+					keyRedirects[key] = matchedId;
+				} else if (!key.startsWith('no_discord_')) {
+					keyRedirects[key] = `no_discord_${noDiscordCounter++}`;
+					if (
+						!fullNameMap[keyRedirects[key]] ||
+						data.name.length > fullNameMap[keyRedirects[key]].length
+					) {
+						fullNameMap[keyRedirects[key]] = data.name;
+					}
+				} else {
+					if (
+						!fullNameMap[key] ||
+						data.name.length > fullNameMap[key].length
+					) {
+						fullNameMap[key] = data.name;
+					}
 				}
 			}
-		}
-		return bestStringKey;
-	};
+		});
+	}
 
 	for (let w = 1; w <= 13; w++) {
 		if (db.weeks[w].votes) {
 			const newVotes = {};
 			for (const [key, data] of Object.entries(db.weeks[w].votes)) {
-				const resolvedKey = resolveKey(key, data.name);
-				const finalName =
-					fullNameMap[resolvedKey] ||
-					stringAliases[resolvedKey.toLowerCase()] ||
-					resolvedKey;
+				const resolvedKey = keyRedirects[key] || key;
+				const finalName = fullNameMap[resolvedKey] || data.name;
 				newVotes[resolvedKey] = { ...data, name: finalName };
 			}
 			db.weeks[w].votes = newVotes;
@@ -80,11 +88,8 @@ function normalizeDatabaseUsers(db) {
 		if (db.weeks[w].scores) {
 			const newScores = {};
 			for (const [key, data] of Object.entries(db.weeks[w].scores)) {
-				const resolvedKey = resolveKey(key, data.name);
-				const finalName =
-					fullNameMap[resolvedKey] ||
-					stringAliases[resolvedKey.toLowerCase()] ||
-					resolvedKey;
+				const resolvedKey = keyRedirects[key] || key;
+				const finalName = fullNameMap[resolvedKey] || data.name;
 
 				if (newScores[resolvedKey]) {
 					newScores[resolvedKey].E += data.E || 0;
