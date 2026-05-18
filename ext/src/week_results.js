@@ -118,7 +118,6 @@ document
 		const group = document.getElementById('groupSelect').value;
 		const db = await loadDB();
 		const weekData = db.weeks[week];
-		const rawVotes = weekData.votes;
 
 		const polls = { egg: {}, size: {}, reward: {}, token: {} };
 		if (weekData.polls) {
@@ -170,20 +169,8 @@ document
 				token: ans.T || 0,
 			},
 			scores: weekData.scores || {},
-			votes: { egg: {}, size: {}, reward: {}, token: {} },
+			votes: weekData.votes || {},
 		};
-
-		const catMap = { E: 'egg', S: 'size', R: 'reward', T: 'token' };
-		for (const [id, user] of Object.entries(rawVotes)) {
-			for (const [code, name] of Object.entries(catMap)) {
-				if (user[code] && user[code] !== 'DQ') {
-					if (!exportData.votes[name][user[code]]) {
-						exportData.votes[name][user[code]] = [];
-					}
-					exportData.votes[name][user[code]].push(id);
-				}
-			}
-		}
 
 		const a = document.createElement('a');
 		a.href =

@@ -22,20 +22,8 @@ document
 			const week =
 				data.week || document.getElementById('weekSelect').value;
 			const revCatMap = { egg: 'E', size: 'S', reward: 'R', token: 'T' };
-			const newVotes = {};
-
-			if (data.votes) {
-				for (const [catName, options] of Object.entries(data.votes)) {
-					const code = revCatMap[catName];
-					if (!code) continue;
-					for (const [optNum, users] of Object.entries(options)) {
-						users.forEach((id) => {
-							if (!newVotes[id]) newVotes[id] = { name: id };
-							newVotes[id][code] = parseInt(optNum, 10);
-						});
-					}
-				}
-			}
+			const newVotes = data.votes || {};
+			const newScores = data.scores || {};
 
 			if (data.polls) {
 				let pollString = '';
@@ -86,22 +74,8 @@ document
 				db.weeks[week].polls = pollString.trim();
 			}
 
-			Object.keys(newVotes).forEach((id) => {
-				let foundName = id;
-				for (let w = 1; w <= 13; w++) {
-					if (
-						db.weeks[w].votes &&
-						db.weeks[w].votes[id] &&
-						db.weeks[w].votes[id].name !== id
-					) {
-						foundName = db.weeks[w].votes[id].name;
-						break;
-					}
-				}
-				newVotes[id].name = foundName;
-			});
-
 			db.weeks[week].votes = newVotes;
+			db.weeks[week].scores = newScores;
 			await saveDB(db);
 
 			document.getElementById('importText').value = '';

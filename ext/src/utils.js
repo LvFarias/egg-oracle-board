@@ -36,7 +36,7 @@ function shuffleArray(array) {
 }
 
 function getCurrentWeek() {
-	const startDate = new Date('2026-03-16T00:00:00');
+	const startDate = new Date('2026-03-16T13:00:00');
 	const now = new Date();
 	const diffTime = now - startDate;
 	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
