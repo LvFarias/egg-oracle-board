@@ -36,7 +36,8 @@ function renderTable(playersList, titleOverride) {
 		const p = playersList[i];
 
 		const rawRStr = String(i + 1).padStart(2, ' ');
-		const cutName = p.name.substring(0, 13);
+		const cleanName = p.name.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
+		const cutName = cleanName.substring(0, 13);
 		const rawNStr = ' ' + cutName.padEnd(13, ' ') + ' ';
 		const rawTStr = String(p.Total).padStart(3, ' ');
 
