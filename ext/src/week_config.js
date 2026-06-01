@@ -85,7 +85,7 @@ document
 		let rewardCmd = '/poll create message:Final Reward Speculation ';
 		rewards.forEach((r, i) => (rewardCmd += `choice${i + 1}:${r} `));
 
-		const generatedString = `${sizeCmd.trim()}\n\n${eggCmd.trim()}\n\n${tokenCmd.trim()}\n\n${rewardCmd.trim()}`;
+		const generatedString = `${eggCmd.trim()}\n\n${sizeCmd.trim()}\n\n${rewardCmd.trim()}\n\n${tokenCmd.trim()}`;
 
 		document.getElementById('mainOutputContainer').style.display = 'none';
 		document.getElementById('pollOutputContainer').style.display = 'block';
