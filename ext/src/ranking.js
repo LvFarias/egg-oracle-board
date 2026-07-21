@@ -172,14 +172,13 @@ function renderGlobal(db) {
 		) {
 			p.colorName = 'cyan';
 		}
-
-		if (p.P > prev.P) p.colorP = 'blue';
-		if (p.M > prev.M) p.colorM = 'blue';
-		if (p.E > prev.E) p.colorE = 'blue';
-		if (p.S > prev.S) p.colorS = 'blue';
-		if (p.R > prev.R) p.colorR = 'blue';
-		if (p.D > prev.D) p.colorD = 'blue';
-		if (p.Total > prev.Total) p.colorTotal = 'blue';
+		if (p.P !== prev.P) p.colorP = 'blue';
+		if (p.M !== prev.M) p.colorM = 'blue';
+		if (p.E !== prev.E) p.colorE = 'blue';
+		if (p.S !== prev.S) p.colorS = 'blue';
+		if (p.R !== prev.R) p.colorR = 'blue';
+		if (p.D !== prev.D) p.colorD = 'blue';
+		if (p.Total !== prev.Total) p.colorTotal = 'blue';
 	});
 
 	const groupName = document.getElementById('groupSelect').value;

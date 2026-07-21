@@ -2,13 +2,14 @@ document
 	.getElementById('btnGeneratePolls')
 	.addEventListener('click', async () => {
 		const maxSRTemplates = [
-			['-39k', '40k-60k', '61k-90k', '91k-120k', '+121k'],
-			['-49k', '50k-80k', '81k-110k', '111k-140k', '+140k'],
-			['-39k', '40k-70k', '71k-100k', '101k-130k', '+131k'],
-			['-60k', '60k-100k', '100k-140k', '140k+'],
+			['-50k', '51k-70k', '71k-90k', '91k-110k', '+111k'],
+			['-60k', '61k-75k', '76k-90k', '91k-110k', '+111k'],
+			['-55k', '56k-80k', '81k-105k', '106k-125k', '+126k'],
+			['< 50k', '50k-70k', '71k-90k', '91k-115k', '> 115k'],
 		];
 		const maxSRs =
 			maxSRTemplates[Math.floor(Math.random() * maxSRTemplates.length)];
+		shuffleArray(maxSRs);
 		let maxSRCmd = `/poll create message:${window.POLL_NAMES.M} `;
 		maxSRs.forEach((m, i) => (maxSRCmd += `choice${i + 1}:${m} `));
 
@@ -45,62 +46,77 @@ document
 		}
 
 		const sizeTemplates = [
-			['1-2', '3-4', '5-6', '7-8', '9-10', '11-15', '16+'],
+			[
+				'1-2',
+				'3-4',
+				'5-6',
+				'7-8',
+				'9-10',
+				'11-12',
+				'13-14',
+				'15-16',
+				'17+',
+			],
 			['1-3', '4-6', '7-9', '10-12', '13-15', '16+'],
-			['1-4', '5-8', '9-16', '17+'],
+			['1-4', '5-8', '9-12', '13-16', '17+'],
 			['1-5', '6-10', '11-15', '16+'],
 		];
 		const sizes =
 			sizeTemplates[Math.floor(Math.random() * sizeTemplates.length)];
+		shuffleArray(sizes);
 		let sizeCmd = `/poll create message:${window.POLL_NAMES.S} `;
 		sizes.forEach((s, i) => (sizeCmd += `choice${i + 1}:${s} `));
 
 		const rewardTemplates = [
 			[
 				'Artifacts',
-				'Piggy Bank (Fill/Level)',
+				'Piggy Bank',
 				'Boosts',
-				'GE / Epic Research',
+				'Golden Eggs',
 				'Soul Eggs',
+				'Epic Research',
 				'Shell Tickets',
 			],
 			[
-				'Artifact',
-				'Piggy Level Up',
+				'Artifact / Epic Research',
 				'Piggy Fill',
+				'Piggy Level Up',
 				'Boosts / GE',
-				'Soul Eggs / Shell Tickets',
+				'SE / Tickets',
 			],
 			[
-				'Piggy Bank / Soul Eggs',
 				'Beacons / Prisms',
 				'Other Boosts',
-				'Artifacts / Epic Research',
-				'Shell Tickets / GE',
+				'Artifacts',
+				'Piggy Bank / GE',
+				'Epic Research / SE',
 			],
 			[
 				'Golden Eggs',
-				'Piggy Fill / Level',
-				'Artifact Box',
-				'Boosts (Any)',
-				'Other (SE / Tickets)',
+				'Piggy (Any)',
+				'Artifacts / Epic Research',
+				'Boosts',
+				'Other',
 			],
 		];
 		const rewards =
 			rewardTemplates[Math.floor(Math.random() * rewardTemplates.length)];
+		shuffleArray(rewards);
 		let rewardCmd = `/poll create message:${window.POLL_NAMES.R} `;
 		rewards.forEach((r, i) => (rewardCmd += `choice${i + 1}:${r} `));
 
 		const durationTemplates = [
-			['2-3d', '4-5d', '6-7d', '8-9d', '+10d'],
-			['2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '+10d'],
-			['2-4d', '5-7d', '8-10d', '+11d'],
-			['2-6d', '7-10d', '+11d'],
+			['1d', '2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '+10d'],
+			['1-2d', '3-4d', '5-6d', '7-8d', '9-10d', '+11d'],
+			['1-3d', '4-6d', '7-9d', '10-12d', '+13d'],
+			['1-4d', '5-8d', '9-12d', '+13d'],
+			['1-5d', '6-10d', '+11d'],
 		];
 		const durations =
 			durationTemplates[
 				Math.floor(Math.random() * durationTemplates.length)
 			];
+		shuffleArray(durations);
 		let durationCmd = `/poll create message:${window.POLL_NAMES.D} `;
 		durations.forEach((d, i) => (durationCmd += `choice${i + 1}:${d} `));
 
