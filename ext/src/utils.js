@@ -10,7 +10,21 @@ window.EMOJI_MAP = {
 	'9️⃣': 9,
 	'🔟': 10,
 };
-window.CATEGORY_NAMES = { E: 'Egg', S: 'Size', R: 'Reward', T: 'Token' };
+window.CATEGORY_NAMES = {
+	P: 'Perfect Week',
+	M: 'Max SR',
+	E: 'Egg',
+	S: 'Size',
+	R: 'Reward',
+	D: 'Duration',
+};
+window.POLL_NAMES = {
+	M: 'Max SR Score Prediction',
+	E: 'Next Egg Forecast',
+	S: 'Contract Size Prediction',
+	R: 'Final Reward Speculation',
+	D: 'Contract Duration Guess',
+};
 window.currentPendingScores = null;
 
 function formatName(rawName) {
@@ -35,8 +49,9 @@ function shuffleArray(array) {
 	return array;
 }
 
-function getCurrentWeek() {
-	const startDate = new Date('2026-03-16T16:00:00Z');
+function getCurrentWeek(startDateStr) {
+	if (!startDateStr) return 1;
+	const startDate = new Date(startDateStr + 'T16:00:00Z');
 	const now = new Date();
 	const diffTime = now - startDate;
 	const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));

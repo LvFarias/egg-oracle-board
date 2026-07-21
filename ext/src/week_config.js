@@ -1,6 +1,17 @@
 document
 	.getElementById('btnGeneratePolls')
 	.addEventListener('click', async () => {
+		const maxSRTemplates = [
+			['-39k', '40k-60k', '61k-90k', '91k-120k', '+121k'],
+			['-49k', '50k-80k', '81k-110k', '111k-140k', '+140k'],
+			['-39k', '40k-70k', '71k-100k', '101k-130k', '+131k'],
+			['-60k', '60k-100k', '100k-140k', '140k+'],
+		];
+		const maxSRs =
+			maxSRTemplates[Math.floor(Math.random() * maxSRTemplates.length)];
+		let maxSRCmd = `/poll create message:${window.POLL_NAMES.M} `;
+		maxSRs.forEach((m, i) => (maxSRCmd += `choice${i + 1}:${m} `));
+
 		const eggs = [
 			':egg_edible:',
 			':egg_superfood:',
@@ -28,8 +39,7 @@ document
 			':egg_unknown:',
 		];
 		shuffleArray(eggs);
-
-		let eggCmd = '/poll create message:Next Egg Forecast ';
+		let eggCmd = `/poll create message:${window.POLL_NAMES.E} `;
 		for (let i = 0; i < 8; i++) {
 			eggCmd += `choice${i + 1}:${eggs[i * 3]} ${eggs[i * 3 + 1]} ${eggs[i * 3 + 2]} `;
 		}
@@ -42,19 +52,8 @@ document
 		];
 		const sizes =
 			sizeTemplates[Math.floor(Math.random() * sizeTemplates.length)];
-		let sizeCmd = '/poll create message:Contract Size Prediction ';
+		let sizeCmd = `/poll create message:${window.POLL_NAMES.S} `;
 		sizes.forEach((s, i) => (sizeCmd += `choice${i + 1}:${s} `));
-
-		const tokenTemplates = [
-			['15min', '30min', '60min', '120min', '180min', '240min'],
-			['15min', '30min', '45min', '60min', '90min', '120min'],
-			['15-30min', '45-60min', '90-120min', '180+min'],
-			['15min', '30min', '60min', '90min', '120min', '240min'],
-		];
-		const tokens =
-			tokenTemplates[Math.floor(Math.random() * tokenTemplates.length)];
-		let tokenCmd = '/poll create message:Token Interval Guess ';
-		tokens.forEach((t, i) => (tokenCmd += `choice${i + 1}:${t} `));
 
 		const rewardTemplates = [
 			[
@@ -79,13 +78,33 @@ document
 				'Artifacts / Epic Research',
 				'Shell Tickets / GE',
 			],
+			[
+				'Golden Eggs',
+				'Piggy Fill / Level',
+				'Artifact Box',
+				'Boosts (Any)',
+				'Other (SE / Tickets)',
+			],
 		];
 		const rewards =
 			rewardTemplates[Math.floor(Math.random() * rewardTemplates.length)];
-		let rewardCmd = '/poll create message:Final Reward Speculation ';
+		let rewardCmd = `/poll create message:${window.POLL_NAMES.R} `;
 		rewards.forEach((r, i) => (rewardCmd += `choice${i + 1}:${r} `));
 
-		const generatedString = `${eggCmd.trim()}\n\n${sizeCmd.trim()}\n\n${rewardCmd.trim()}\n\n${tokenCmd.trim()}`;
+		const durationTemplates = [
+			['2-3d', '4-5d', '6-7d', '8-9d', '+10d'],
+			['2d', '3d', '4d', '5d', '6d', '7d', '8d', '9d', '+10d'],
+			['2-4d', '5-7d', '8-10d', '+11d'],
+			['2-6d', '7-10d', '+11d'],
+		];
+		const durations =
+			durationTemplates[
+				Math.floor(Math.random() * durationTemplates.length)
+			];
+		let durationCmd = `/poll create message:${window.POLL_NAMES.D} `;
+		durations.forEach((d, i) => (durationCmd += `choice${i + 1}:${d} `));
+
+		const generatedString = `${maxSRCmd.trim()}\n\n${eggCmd.trim()}\n\n${sizeCmd.trim()}\n\n${rewardCmd.trim()}\n\n${durationCmd.trim()}`;
 
 		document.getElementById('mainOutputContainer').style.display = 'none';
 		document.getElementById('pollOutputContainer').style.display = 'block';
@@ -113,14 +132,12 @@ document.getElementById('btnCopyPingUsers').addEventListener('click', () => {
 						'to be pinged every time a new poll becomes available',
 					),
 			);
-
 			if (!targetMsg) return setStatus('Ping message not found.');
 			if (!targetMsg.reactions || targetMsg.reactions.length === 0)
 				return setStatus('No reactions found.');
 
 			setStatus('Fetching users...');
 			const pingUsers = new Set();
-
 			for (const rx of targetMsg.reactions) {
 				const emojiEncoded = rx.emoji.id
 					? `${rx.emoji.name}:${rx.emoji.id}`
@@ -130,14 +147,12 @@ document.getElementById('btnCopyPingUsers').addEventListener('click', () => {
 					`/channels/${channelId}/messages/${targetMsg.id}/reactions/${emojiEncoded}?limit=100`,
 					token,
 				);
-
 				users.forEach((u) => {
 					if (!u.bot) pingUsers.add(`<@${u.id}>`);
 				});
 			}
 
 			if (pingUsers.size === 0) return setStatus('No valid users found.');
-
 			const pingList = Array.from(pingUsers).join(' ');
 			navigator.clipboard.writeText(pingList);
 			setStatus(`${pingUsers.size} users copied to clipboard.`);

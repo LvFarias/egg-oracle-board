@@ -5,7 +5,6 @@ function getDbKey() {
 function normalizeDatabaseUsers(db) {
 	const nameToRealId = {};
 	const fullNameMap = {};
-
 	for (let w = 1; w <= 13; w++) {
 		const lists = [
 			Object.entries(db.weeks[w].votes || {}),
@@ -31,9 +30,7 @@ function normalizeDatabaseUsers(db) {
 	const resolveKey = (key, name) => {
 		if (/^\d{17,20}$/.test(key)) return key;
 		const lowerName = name.toLowerCase().trim();
-
 		if (nameToRealId[lowerName]) return nameToRealId[lowerName];
-
 		for (const [knownName, knownId] of Object.entries(nameToRealId)) {
 			if (knownName.length >= 4 && lowerName.length >= 4) {
 				if (
@@ -44,7 +41,6 @@ function normalizeDatabaseUsers(db) {
 				}
 			}
 		}
-
 		const cleanBase = lowerName.replace(/[^a-z0-9]/g, '');
 		return 'no_discord_' + cleanBase;
 	};
@@ -56,7 +52,6 @@ function normalizeDatabaseUsers(db) {
 				if (!data.name) continue;
 				const resolvedKey = resolveKey(key, data.name);
 				const finalName = fullNameMap[resolvedKey] || data.name;
-
 				if (
 					!fullNameMap[resolvedKey] ||
 					finalName.length > fullNameMap[resolvedKey].length
@@ -67,26 +62,25 @@ function normalizeDatabaseUsers(db) {
 			}
 			db.weeks[w].votes = newVotes;
 		}
-
 		if (db.weeks[w].scores) {
 			const newScores = {};
 			for (const [key, data] of Object.entries(db.weeks[w].scores)) {
 				if (!data.name) continue;
 				const resolvedKey = resolveKey(key, data.name);
 				const finalName = fullNameMap[resolvedKey] || data.name;
-
 				if (
 					!fullNameMap[resolvedKey] ||
 					finalName.length > fullNameMap[resolvedKey].length
 				) {
 					fullNameMap[resolvedKey] = finalName;
 				}
-
 				if (newScores[resolvedKey]) {
 					newScores[resolvedKey].E += data.E || 0;
 					newScores[resolvedKey].S += data.S || 0;
 					newScores[resolvedKey].R += data.R || 0;
-					newScores[resolvedKey].T += data.T || 0;
+					newScores[resolvedKey].D += data.D || 0;
+					newScores[resolvedKey].M += data.M || 0;
+					newScores[resolvedKey].P += data.P || 0;
 					newScores[resolvedKey].Total += data.Total || 0;
 					newScores[resolvedKey].name = finalName;
 				} else {
@@ -111,7 +105,6 @@ function normalizeDatabaseUsers(db) {
 			}
 		}
 	}
-
 	return db;
 }
 
@@ -120,16 +113,20 @@ async function loadDB() {
 		chrome.storage.local.get([getDbKey()], (res) => {
 			let db = res[getDbKey()];
 			if (!db) {
-				db = { seasonName: 'Season 1', weeks: {} };
-			}
-			for (let i = 1; i <= 13; i++) {
-				if (!db.weeks[i]) {
-					db.weeks[i] = {
-						polls: '',
-						votes: {},
-						scores: {},
-						answers: {},
-					};
+				db = {
+					seasonName: 'Season 1',
+					seasonStartDate: '2026-03-16',
+					weeks: {},
+				};
+				for (let i = 1; i <= 13; i++) {
+					if (!db.weeks[i]) {
+						db.weeks[i] = {
+							polls: '',
+							votes: {},
+							scores: {},
+							answers: {},
+						};
+					}
 				}
 			}
 			db = normalizeDatabaseUsers(db);

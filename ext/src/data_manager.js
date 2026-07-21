@@ -15,31 +15,28 @@ document
 	.addEventListener('click', async () => {
 		const text = document.getElementById('importText').value.trim();
 		if (!text) return setStatus('No data to import.');
-
 		try {
 			const data = JSON.parse(text);
 			const db = await loadDB();
 			const week =
 				data.week || document.getElementById('weekSelect').value;
-			const revCatMap = { egg: 'E', size: 'S', reward: 'R', token: 'T' };
 			const newVotes = data.votes || {};
 			const newScores = data.scores || {};
 
 			if (data.polls) {
 				let pollString = '';
 				if (
-					data.polls.size &&
-					Object.keys(data.polls.size).length > 0
+					data.polls.maxSR &&
+					Object.keys(data.polls.maxSR).length > 0
 				) {
-					pollString +=
-						'/poll create message:Contract Size Prediction ';
+					pollString += `/poll create message:${window.POLL_NAMES.M} `;
 					for (let i = 1; i <= 10; i++)
-						if (data.polls.size[i])
-							pollString += `choice${i}:${data.polls.size[i].join(' ')} `;
+						if (data.polls.maxSR[i])
+							pollString += `choice${i}:${data.polls.maxSR[i].join(' ')} `;
 					pollString = pollString.trim() + '\n\n';
 				}
 				if (data.polls.egg && Object.keys(data.polls.egg).length > 0) {
-					pollString += '/poll create message:Next Egg Forecast ';
+					pollString += `/poll create message:${window.POLL_NAMES.E} `;
 					for (let i = 1; i <= 10; i++) {
 						if (data.polls.egg[i]) {
 							const eggStr = data.polls.egg[i]
@@ -51,33 +48,40 @@ document
 					pollString = pollString.trim() + '\n\n';
 				}
 				if (
-					data.polls.token &&
-					Object.keys(data.polls.token).length > 0
+					data.polls.size &&
+					Object.keys(data.polls.size).length > 0
 				) {
-					pollString += '/poll create message:Token Interval Guess ';
+					pollString += `/poll create message:${window.POLL_NAMES.S} `;
 					for (let i = 1; i <= 10; i++)
-						if (data.polls.token[i])
-							pollString += `choice${i}:${data.polls.token[i].join(' ')} `;
+						if (data.polls.size[i])
+							pollString += `choice${i}:${data.polls.size[i].join(' ')} `;
 					pollString = pollString.trim() + '\n\n';
 				}
 				if (
 					data.polls.reward &&
 					Object.keys(data.polls.reward).length > 0
 				) {
-					pollString +=
-						'/poll create message:Final Reward Speculation ';
+					pollString += `/poll create message:${window.POLL_NAMES.R} `;
 					for (let i = 1; i <= 10; i++)
 						if (data.polls.reward[i])
 							pollString += `choice${i}:${data.polls.reward[i].join(' ')} `;
 					pollString = pollString.trim();
 				}
+				if (
+					data.polls.duration &&
+					Object.keys(data.polls.duration).length > 0
+				) {
+					pollString += `/poll create message:${window.POLL_NAMES.D} `;
+					for (let i = 1; i <= 10; i++)
+						if (data.polls.duration[i])
+							pollString += `choice${i}:${data.polls.duration[i].join(' ')} `;
+					pollString = pollString.trim() + '\n\n';
+				}
 				db.weeks[week].polls = pollString.trim();
 			}
-
 			db.weeks[week].votes = newVotes;
 			db.weeks[week].scores = newScores;
 			await saveDB(db);
-
 			document.getElementById('importText').value = '';
 			document.getElementById('importText').style.display = 'none';
 			document.getElementById('btnConfirmImport').style.display = 'none';
@@ -87,14 +91,9 @@ document
 			const newScores = {};
 			const stripAnsi = (str) => str.replace(/\u001b\[\d+m/g, '').trim();
 			let importedCount = 0;
-
 			const group = document.getElementById('groupSelect').value;
 			let regex =
-				/^\s*\d+\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*$/;
-			if (group === '1q') {
-				regex =
-					/^\s*\d+\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*$/;
-			}
+				/^\s*\d+\s*\|\s*(.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*$/;
 
 			const db = await loadDB();
 			const findExistingId = (searchName) => {
@@ -134,14 +133,15 @@ document
 					if (!resolvedId) {
 						resolvedId = `no_discord_${tempCounter++}`;
 					}
-
 					newScores[resolvedId] = {
 						name: name,
-						E: parseInt(match[2], 10),
-						S: parseInt(match[3], 10),
-						R: group === '1q' ? 0 : parseInt(match[4], 10),
-						T: group === '1q' ? 0 : parseInt(match[5], 10),
-						Total: parseInt(match[group === '1q' ? 4 : 6], 10),
+						P: parseInt(match[2], 10),
+						M: parseInt(match[3], 10),
+						E: parseInt(match[4], 10),
+						S: parseInt(match[5], 10),
+						R: parseInt(match[6], 10),
+						D: parseInt(match[7], 10),
+						Total: parseInt(match[8], 10),
 					};
 					importedCount++;
 				}
@@ -173,13 +173,14 @@ document.getElementById('btnReset').addEventListener('click', async () => {
 			seasonName: document.getElementById('seasonName').value,
 			weeks: {},
 		};
-		for (let i = 1; i <= 13; i++)
+		for (let i = 1; i <= 13; i++) {
 			defaultDb.weeks[i] = {
 				polls: '',
 				votes: {},
 				scores: {},
 				answers: {},
 			};
+		}
 		await saveDB(defaultDb);
 		renderGlobal(defaultDb);
 		setStatus('Leaderboard reset.');

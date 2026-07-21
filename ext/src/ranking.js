@@ -1,3 +1,14 @@
+const sortFn = (a, b) => {
+	if (b.Total !== a.Total) return b.Total - a.Total;
+	if (b.P !== a.P) return b.P - a.P;
+	if (b.M !== a.M) return b.M - a.M;
+	if (b.E !== a.E) return b.E - a.E;
+	if (b.S !== a.S) return b.S - a.S;
+	if (b.R !== a.R) return b.R - a.R;
+	if (b.D !== a.D) return b.D - a.D;
+	return a.name.localeCompare(b.name);
+};
+
 function renderTable(playersList, titleOverride) {
 	const group = document.getElementById('groupSelect').value;
 	if (playersList.length === 0) {
@@ -8,37 +19,27 @@ function renderTable(playersList, titleOverride) {
 		return;
 	}
 
-	playersList.sort((a, b) => {
-		if (b.Total !== a.Total) return b.Total - a.Total;
-		if (b.E !== a.E) return b.E - a.E;
-		if (b.S !== a.S) return b.S - a.S;
-		if (b.R !== a.R) return b.R - a.R;
-		if (b.T !== a.T) return b.T - a.T;
-		return a.name.localeCompare(b.name);
-	});
+	playersList.sort(sortFn);
 
 	let categories = Object.keys(window.CATEGORY_NAMES);
-	if (group === '1q') {
-		categories = ['E', 'S'];
-	}
 
 	const yp = '\u001b[33m|\u001b[0m';
-
 	let out = `\`\`\`ansi\n`;
 
 	const headerCats = categories.map((c) => c.padStart(2, ' ')).join(yp);
-	out += ` #${yp} ${'Player'.padEnd(13, ' ')} ${yp}${headerCats}${yp} Pt\n`;
+	out += ` #${yp} ${'Player'.padEnd(9, ' ')} ${yp}${headerCats}${yp} Pt\n`;
 
-	const dividerLen = 2 + 1 + 15 + 1 + (categories.length * 3 - 1) + 1 + 3;
+	const dividerLen = 2 + 1 + 11 + 1 + (categories.length * 3 - 1) + 1 + 3;
 	out += `—`.repeat(dividerLen) + `\n`;
 
 	for (let i = 0; i < playersList.length; i++) {
 		const p = playersList[i];
-
 		const rawRStr = String(i + 1).padStart(2, ' ');
-		const cleanName = p.name.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '').trim();
-		const cutName = cleanName.substring(0, 13);
-		const rawNStr = ' ' + cutName.padEnd(13, ' ') + ' ';
+		const cleanName = p.name
+			.replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, '')
+			.trim();
+		const cutName = cleanName.substring(0, 9);
+		const rawNStr = ' ' + cutName.padEnd(9, ' ') + ' ';
 		const rawTStr = String(p.Total).padStart(3, ' ');
 
 		const rStr = applyColor(rawRStr, p.colorRank);
@@ -55,14 +56,7 @@ function renderTable(playersList, titleOverride) {
 		out += `${rStr}${yp}${nStr}${yp}${catStrs}${yp}${tStr}\n`;
 	}
 	out += `\`\`\``;
-
-	let legend = `Legend:\n\`\`\`ansi\n`;
-	legend += `${applyColor('Cyan', 'cyan')}   : Weekly Top Scorer(s)\n`;
-	legend += `${applyColor('Green', 'green')}  : Rank Up | ${applyColor('Red', 'red')}: Rank Down\n`;
-	legend += `${applyColor('Blue', 'blue')}   : Points earned this week\n`;
-	legend += `(${categories.map((c) => c + ': ' + window.CATEGORY_NAMES[c]).join(' | ')})\n`;
-	legend += `\`\`\``;
-	setOutput(`## ${titleOverride || 'Leaderboard'}\n${out}\n${legend}`);
+	setOutput(`## ${titleOverride || 'Leaderboard'}\n${out}`);
 }
 
 function renderGlobal(db) {
@@ -84,33 +78,46 @@ function renderGlobal(db) {
 				currScores[id] = {
 					id: id,
 					name: score.name,
+					P: 0,
+					M: 0,
 					E: 0,
 					S: 0,
 					R: 0,
-					T: 0,
+					D: 0,
 					Total: 0,
 					latestWeekTotal: 0,
 				};
 			}
-
 			if (score.name.length > currScores[id].name.length) {
 				currScores[id].name = score.name;
 			}
 
+			currScores[id].P += score.P || 0;
+			currScores[id].M += score.M || 0;
 			currScores[id].E += score.E || 0;
 			currScores[id].S += score.S || 0;
 			currScores[id].R += score.R || 0;
-			currScores[id].T += score.T || 0;
+			currScores[id].D += score.D || 0;
 			currScores[id].Total += score.Total || 0;
 
 			if (w < latestWeek) {
 				if (!prevScores[id]) {
-					prevScores[id] = { Total: 0, E: 0, S: 0, R: 0, T: 0 };
+					prevScores[id] = {
+						P: 0,
+						M: 0,
+						E: 0,
+						S: 0,
+						R: 0,
+						D: 0,
+						Total: 0,
+					};
 				}
+				prevScores[id].P += score.P || 0;
+				prevScores[id].M += score.M || 0;
 				prevScores[id].E += score.E || 0;
 				prevScores[id].S += score.S || 0;
 				prevScores[id].R += score.R || 0;
-				prevScores[id].T += score.T || 0;
+				prevScores[id].D += score.D || 0;
 				prevScores[id].Total += score.Total || 0;
 			} else if (w === latestWeek) {
 				currScores[id].latestWeekTotal = score.Total || 0;
@@ -121,26 +128,19 @@ function renderGlobal(db) {
 		}
 	}
 
-	const sortFn = (a, b) => {
-		if (b.Total !== a.Total) return b.Total - a.Total;
-		if (b.E !== a.E) return b.E - a.E;
-		if (b.S !== a.S) return b.S - a.S;
-		if (b.R !== a.R) return b.R - a.R;
-		if (b.T !== a.T) return b.T - a.T;
-		return a.name.localeCompare(b.name);
-	};
-
 	const currArr = Object.values(currScores).sort(sortFn);
 	currArr.forEach((p, idx) => (p.currRank = idx + 1));
 
 	const prevArr = Object.values(currScores)
 		.map((p) => {
 			const prev = prevScores[p.id] || {
-				Total: 0,
+				P: 0,
+				M: 0,
 				E: 0,
 				S: 0,
 				R: 0,
-				T: 0,
+				D: 0,
+				Total: 0,
 			};
 			return { id: p.id, name: p.name, ...prev };
 		})
@@ -152,11 +152,13 @@ function renderGlobal(db) {
 	currArr.forEach((p) => {
 		const oldRank = prevRanks[p.id];
 		const prev = prevScores[p.id] || {
-			Total: 0,
+			P: 0,
+			M: 0,
 			E: 0,
 			S: 0,
 			R: 0,
-			T: 0,
+			D: 0,
+			Total: 0,
 		};
 
 		if (oldRank !== undefined) {
@@ -171,10 +173,12 @@ function renderGlobal(db) {
 			p.colorName = 'cyan';
 		}
 
+		if (p.P > prev.P) p.colorP = 'blue';
+		if (p.M > prev.M) p.colorM = 'blue';
 		if (p.E > prev.E) p.colorE = 'blue';
 		if (p.S > prev.S) p.colorS = 'blue';
 		if (p.R > prev.R) p.colorR = 'blue';
-		if (p.T > prev.T) p.colorT = 'blue';
+		if (p.D > prev.D) p.colorD = 'blue';
 		if (p.Total > prev.Total) p.colorTotal = 'blue';
 	});
 
@@ -195,10 +199,11 @@ document
 		db.seasonName = document.getElementById('seasonName').value;
 		db.weeks[week].scores = window.currentPendingScores;
 		db.weeks[week].answers = {
-			S: parseInt(document.getElementById('correctSize').value),
+			M: parseInt(document.getElementById('correctMaxSR').value),
 			E: parseInt(document.getElementById('correctEgg').value),
+			S: parseInt(document.getElementById('correctSize').value),
 			R: parseInt(document.getElementById('correctReward').value),
-			T: parseInt(document.getElementById('correctToken').value),
+			D: parseInt(document.getElementById('correctDuration').value),
 		};
 
 		await saveDB(db);

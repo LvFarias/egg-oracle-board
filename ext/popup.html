@@ -29,14 +29,14 @@
 			.form-group {
 				margin-bottom: 10px;
 			}
-			label {
+			.form-group label {
 				display: block;
 				font-size: 12px;
 				margin-bottom: 3px;
 				font-weight: bold;
 			}
-			input,
-			select {
+			.form-group input,
+			.form-group select {
 				width: 100%;
 				padding: 5px;
 				background: #242429;
@@ -179,36 +179,65 @@
 		<div style="display: flex; gap: 10px; margin-bottom: 5px">
 			<div class="form-group" style="flex: 1">
 				<label>Group:</label>
-				<select id="groupSelect">
-					<option value="BN">BN</option>
-					<option value="1q">1q</option>
-				</select>
+				<div style="display: flex; gap: 5px">
+					<select id="groupSelect"></select>
+					<button
+						id="btnDeleteGroup"
+						style="
+							width: auto;
+							background: #d93e44;
+							margin-top: 0;
+							padding: 5px 10px;
+						"
+						title="Delete Group"
+					>
+						X
+					</button>
+				</div>
 			</div>
-			<div class="form-group" style="flex: 1.2">
+			<div class="form-group" style="flex: 1">
 				<label>Season:</label>
 				<input type="text" id="seasonName" value="Season 1" />
+			</div>
+			<div class="form-group" style="flex: 1">
+				<label>Start Date:</label>
+				<input type="date" id="seasonStartDate" />
 			</div>
 			<div class="form-group" style="flex: 1">
 				<label>Week:</label>
 				<select id="weekSelect"></select>
 			</div>
 		</div>
-
 		<h2>Start Week Config</h2>
 		<div style="display: flex; gap: 5px; margin-bottom: 5px">
 			<button id="btnGeneratePolls">Generate Polls</button>
 			<button id="btnCopyPingUsers">Copy Ping-Users</button>
 		</div>
-
 		<h2>Week Results</h2>
 		<div style="display: flex; gap: 5px; margin-bottom: 10px">
 			<button id="btnImport">Import Week</button>
 			<button id="btnRecordVotes">Extract Votes</button>
 			<button id="btnExportVotes">Export Week</button>
 		</div>
-
-		<div style="display: flex; gap: 5px; margin-bottom: 10px">
-			<div class="form-group" style="flex: 1">
+		<div
+			style="
+				display: flex;
+				gap: 5px;
+				margin-bottom: 10px;
+				flex-wrap: wrap;
+			"
+		>
+			<div class="form-group" style="flex: 1; min-width: 45px">
+				<label>Max SR:</label
+				><input
+					type="number"
+					id="correctMaxSR"
+					min="0"
+					max="10"
+					value="0"
+				/>
+			</div>
+			<div class="form-group" style="flex: 1; min-width: 45px">
 				<label>Egg:</label
 				><input
 					type="number"
@@ -218,7 +247,7 @@
 					value="0"
 				/>
 			</div>
-			<div class="form-group" style="flex: 1">
+			<div class="form-group" style="flex: 1; min-width: 45px">
 				<label>Size:</label
 				><input
 					type="number"
@@ -228,7 +257,7 @@
 					value="0"
 				/>
 			</div>
-			<div class="form-group" style="flex: 1">
+			<div class="form-group" style="flex: 1; min-width: 45px">
 				<label>Reward:</label
 				><input
 					type="number"
@@ -238,29 +267,25 @@
 					value="0"
 				/>
 			</div>
-			<div class="form-group" style="flex: 1">
-				<label>Token:</label
+			<div class="form-group" style="flex: 1; min-width: 45px">
+				<label>Duration:</label
 				><input
 					type="number"
-					id="correctToken"
+					id="correctDuration"
 					min="0"
 					max="10"
 					value="0"
 				/>
 			</div>
 		</div>
-
 		<button id="btnCalculate">Calculate Week Ranking</button>
 		<button id="btnUpdateGlobal">Update Season Ranking</button>
-
 		<textarea
 			id="importText"
 			placeholder="Paste the leaderboard table here... It will replace the selected week's scores and update the Global ranking."
 		></textarea>
 		<button id="btnConfirmImport">Confirm Import</button>
-
 		<div id="status" class="status"></div>
-
 		<div
 			id="pollOutputContainer"
 			class="output-container"
@@ -271,7 +296,6 @@
 			</button>
 			<pre id="pollOutput"></pre>
 		</div>
-
 		<div
 			id="mainOutputContainer"
 			class="output-container"
@@ -286,7 +310,6 @@
 			</button>
 			<pre id="output"></pre>
 		</div>
-
 		<button id="btnReset">Reset Season Leaderboard</button>
 	</body>
 </html>

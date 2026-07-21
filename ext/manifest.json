@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Oracle Board Calculator",
-  "version": "2.1.1",
+  "version": "3.0.0",
   "description": "Calculates the contract prediction leaderboard on Discord.",
   "permissions": ["activeTab", "scripting", "storage"],
   "host_permissions": ["*://*.discord.com/*"],

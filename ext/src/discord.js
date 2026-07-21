@@ -12,7 +12,9 @@ function executeDiscordScript(callback) {
 		if (!tab.url.includes('discord.com/channels/'))
 			return setStatus('Open the Discord channel page.');
 
-		const channelId = tab.url.split('/').pop();
+		const parts = tab.url.split('/');
+		const channelIdx = parts.indexOf('channels');
+		const channelId = parts[channelIdx + 2];
 		setStatus('Extracting token...');
 
 		chrome.scripting.executeScript(
