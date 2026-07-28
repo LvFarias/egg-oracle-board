@@ -1,4 +1,4 @@
-document.getElementById('btnRecordVotes').addEventListener('click', () => {
+document.getElementById('btnExtractVotes').addEventListener('click', () => {
 	executeDiscordScript(async (token, channelId) => {
 		setStatus('Fetching polls...');
 		try {
@@ -117,7 +117,7 @@ document.getElementById('btnCalculate').addEventListener('click', async () => {
 });
 
 document
-	.getElementById('btnExportVotes')
+	.getElementById('btnExportWeek')
 	.addEventListener('click', async () => {
 		const week = document.getElementById('weekSelect').value;
 		const group = document.getElementById('groupSelect').value;

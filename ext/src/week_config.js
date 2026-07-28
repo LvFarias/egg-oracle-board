@@ -2,10 +2,19 @@ document
 	.getElementById('btnGeneratePolls')
 	.addEventListener('click', async () => {
 		const maxSRTemplates = [
-			['-50k', '51k-70k', '71k-90k', '91k-110k', '+111k'],
-			['-60k', '61k-75k', '76k-90k', '91k-110k', '+111k'],
-			['-55k', '56k-80k', '81k-105k', '106k-125k', '+126k'],
-			['< 50k', '50k-70k', '71k-90k', '91k-115k', '> 115k'],
+			[
+				'< 50k',
+				'51k-60k',
+				'61k-70k',
+				'71k-80k',
+				'81k-90k',
+				'91k-100k',
+				'101k-110k',
+				'> 111k',
+			],
+			['< 50k', '51k-65k', '66k-80k', '81k-95k', '96k-110k', '> 111k'],
+			['< 50k', '51k-70k', '71k-90k', '91k-110k', '> 111k'],
+			['< 50k', '50k-80k', '81k-110k', '> 111k'],
 		];
 		const maxSRs =
 			maxSRTemplates[Math.floor(Math.random() * maxSRTemplates.length)];
@@ -37,12 +46,19 @@ document
 			':egg_flameretardant:',
 			':egg_silicon:',
 			':egg_carbonfiber:',
+			':egg_gatoregg:',
 			':egg_unknown:',
 		];
+		// Randomly choose between 3 and 6 emojis for choices
+		const emojisPerChoices = Math.floor(Math.random() * 4) + 3;
+
 		shuffleArray(eggs);
 		let eggCmd = `/poll create message:${window.POLL_NAMES.E} `;
-		for (let i = 0; i < 8; i++) {
-			eggCmd += `choice${i + 1}:${eggs[i * 3]} ${eggs[i * 3 + 1]} ${eggs[i * 3 + 2]} `;
+		for (let i = 0; i < eggs.length; i++) {
+			let choiceEggs = eggs.slice(i * emojisPerChoices, (i + 1) * emojisPerChoices);
+			if (choiceEggs.length === 0) break;
+			eggCmd += `choice${i + 1}:${choiceEggs.join('')} `;
+			if (choiceEggs.length < emojisPerChoices) break;
 		}
 
 		const sizeTemplates = [

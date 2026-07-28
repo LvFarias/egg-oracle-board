@@ -1,4 +1,4 @@
-document.getElementById('btnImport').addEventListener('click', () => {
+document.getElementById('btnImportWeek').addEventListener('click', () => {
 	const importText = document.getElementById('importText');
 	const btnConfirm = document.getElementById('btnConfirmImport');
 	if (importText.style.display !== 'block') {
@@ -81,6 +81,13 @@ document
 			}
 			db.weeks[week].votes = newVotes;
 			db.weeks[week].scores = newScores;
+			db.weeks[week].answers = {
+				M: data.answers.maxSR || 0,
+				E: data.answers.egg || 0,
+				S: data.answers.size || 0,
+				R: data.answers.reward || 0,
+				D: data.answers.duration || 0,
+			},
 			await saveDB(db);
 			document.getElementById('importText').value = '';
 			document.getElementById('importText').style.display = 'none';
