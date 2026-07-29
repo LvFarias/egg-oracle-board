@@ -1,0 +1,1373 @@
+<!doctype html>
+<html lang="pt-BR">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>Oracle Board Manager — Admin Preview</title>
+
+		<style>
+			:root {
+				color-scheme: dark;
+
+				--bg: #0b0d12;
+				--surface: #11141b;
+				--surface-2: #171b23;
+				--surface-3: #1d222c;
+				--surface-4: #232936;
+
+				--border: #2a303b;
+				--border-strong: #394150;
+
+				--text: #f5f7fb;
+				--text-soft: #c7ced8;
+				--text-muted: #929baa;
+
+				--purple: #7c68ff;
+				--purple-dark: #5d48dd;
+				--green: #3fc06b;
+				--green-soft: #82e9a3;
+				--blue: #3a8cff;
+				--yellow: #f2bd50;
+				--red: #ef5864;
+				--red-dark: #bf3945;
+
+				--radius-lg: 18px;
+				--radius-md: 13px;
+				--radius-sm: 10px;
+
+				--shadow:
+					0 22px 70px rgba(0, 0, 0, 0.34),
+					0 2px 10px rgba(0, 0, 0, 0.18);
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			html {
+				min-width: 320px;
+				background: var(--bg);
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				font-family:
+					Inter,
+					ui-sans-serif,
+					system-ui,
+					-apple-system,
+					BlinkMacSystemFont,
+					'Segoe UI',
+					sans-serif;
+				color: var(--text);
+				background:
+					radial-gradient(
+						circle at top left,
+						rgba(124, 104, 255, 0.11),
+						transparent 34rem
+					),
+					radial-gradient(
+						circle at bottom right,
+						rgba(58, 140, 255, 0.07),
+						transparent 30rem
+					),
+					var(--bg);
+			}
+
+			button,
+			input,
+			select {
+				font: inherit;
+			}
+
+			button,
+			select,
+			label[for] {
+				cursor: pointer;
+			}
+
+			.page-shell {
+				width: min(100% - 28px, 860px);
+				margin: 0 auto;
+				padding: 28px 0 56px;
+			}
+
+			.app-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 18px;
+				margin-bottom: 22px;
+				padding-inline: 4px;
+			}
+
+			.brand-block {
+				min-width: 0;
+			}
+
+			.brand-eyebrow {
+				margin: 0 0 5px;
+				color: var(--purple);
+				font-size: 0.74rem;
+				font-weight: 800;
+				letter-spacing: 0.11em;
+				text-transform: uppercase;
+			}
+
+			.brand-title {
+				margin: 0;
+				font-size: clamp(1.6rem, 5vw, 2.2rem);
+				line-height: 1.05;
+				letter-spacing: -0.04em;
+			}
+
+			.account {
+				display: inline-flex;
+				align-items: center;
+				gap: 10px;
+				flex: 0 0 auto;
+				padding: 8px 9px 8px 13px;
+				border: 1px solid var(--border);
+				border-radius: 999px;
+				background: rgba(17, 20, 27, 0.86);
+				box-shadow: 0 8px 26px rgba(0, 0, 0, 0.18);
+			}
+
+			.account-name {
+				color: var(--text-soft);
+				font-size: 0.9rem;
+				font-weight: 700;
+			}
+
+			.logout-button {
+				border: 0;
+				border-radius: 999px;
+				padding: 7px 12px;
+				color: var(--text-muted);
+				background: var(--surface-3);
+				cursor: pointer;
+			}
+
+			.tabs {
+				display: flex;
+				gap: 6px;
+				margin-bottom: 18px;
+				padding: 5px;
+				border: 1px solid var(--border);
+				border-radius: 14px;
+				background: rgba(17, 20, 27, 0.72);
+			}
+
+			.tab {
+				flex: 1;
+				border: 0;
+				border-radius: 10px;
+				padding: 11px 14px;
+				color: var(--text-muted);
+				background: transparent;
+				font-weight: 800;
+				cursor: pointer;
+			}
+
+			.tab.is-active {
+				color: #fff;
+				background: linear-gradient(180deg, #292f3b, #212631);
+				box-shadow: inset 0 0 0 1px #37404e;
+			}
+
+			.admin-stack {
+				display: grid;
+				gap: 16px;
+			}
+
+			.panel {
+				border: 1px solid var(--border);
+				border-radius: var(--radius-lg);
+				background:
+					linear-gradient(
+						180deg,
+						rgba(255, 255, 255, 0.015),
+						transparent
+					),
+					var(--surface);
+				box-shadow: var(--shadow);
+			}
+
+			.panel-header {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 18px;
+				padding: 20px 20px 16px;
+			}
+
+			.panel-title {
+				margin: 0;
+				font-size: 1.12rem;
+				font-weight: 900;
+				letter-spacing: -0.025em;
+			}
+
+			.panel-description {
+				margin: 5px 0 0;
+				color: var(--text-muted);
+				font-size: 0.8rem;
+				line-height: 1.45;
+			}
+
+			.count-pill {
+				flex: 0 0 auto;
+				padding: 7px 10px;
+				border-radius: 999px;
+				color: var(--text-soft);
+				background: var(--surface-3);
+				font-size: 0.74rem;
+				font-weight: 900;
+			}
+
+			.panel-body {
+				padding: 0 20px 20px;
+			}
+
+			.toolbar {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: 10px;
+				margin-bottom: 12px;
+			}
+
+			.search-field,
+			.text-field,
+			.role-select {
+				width: 100%;
+				min-height: 44px;
+				border: 1px solid #343b47;
+				border-radius: var(--radius-sm);
+				outline: none;
+				color: var(--text);
+				background: #11151c;
+				transition:
+					border-color 150ms ease,
+					box-shadow 150ms ease,
+					background 150ms ease;
+			}
+
+			.search-field,
+			.text-field {
+				padding: 0 13px;
+			}
+
+			.role-select {
+				min-width: 114px;
+				padding: 0 34px 0 12px;
+			}
+
+			.search-field:hover,
+			.text-field:hover,
+			.role-select:hover {
+				border-color: #46505f;
+				background: #141922;
+			}
+
+			.search-field:focus,
+			.text-field:focus,
+			.role-select:focus {
+				border-color: var(--purple);
+				box-shadow: 0 0 0 3px rgba(124, 104, 255, 0.15);
+			}
+
+			.button {
+				min-height: 42px;
+				border: 1px solid transparent;
+				border-radius: 10px;
+				padding: 0 14px;
+				color: #fff;
+				font-weight: 900;
+				white-space: nowrap;
+			}
+
+			.button.is-primary {
+				border-color: rgba(153, 139, 255, 0.65);
+				background: linear-gradient(
+					180deg,
+					var(--purple),
+					var(--purple-dark)
+				);
+				box-shadow: 0 10px 24px rgba(92, 69, 210, 0.22);
+			}
+
+			.button.is-secondary {
+				color: var(--text-soft);
+				border-color: var(--border-strong);
+				background: var(--surface-3);
+			}
+
+			.button.is-danger {
+				border-color: rgba(255, 126, 135, 0.35);
+				background: linear-gradient(180deg, var(--red), #d94350);
+			}
+
+			.button.is-danger-ghost {
+				color: #ff8b94;
+				border-color: rgba(239, 88, 100, 0.32);
+				background: rgba(239, 88, 100, 0.08);
+			}
+
+			.button:disabled {
+				cursor: not-allowed;
+				color: #707887;
+				border-color: #303642;
+				background: #1a1e26;
+				box-shadow: none;
+				opacity: 0.72;
+			}
+
+			.user-list,
+			.member-list {
+				display: grid;
+				gap: 9px;
+			}
+
+			.user-row,
+			.member-row {
+				display: grid;
+				align-items: center;
+				gap: 12px;
+				border: 1px solid var(--border-soft);
+				border-radius: 12px;
+				background: #11151c;
+			}
+
+			.user-row {
+				grid-template-columns: minmax(0, 1fr) auto auto;
+				padding: 12px;
+			}
+
+			.member-row {
+				grid-template-columns: minmax(0, 1fr) auto auto;
+				padding: 10px 11px;
+			}
+
+			.person {
+				min-width: 0;
+			}
+
+			.person-name-line {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				min-width: 0;
+			}
+
+			.person-name {
+				overflow: hidden;
+				font-size: 0.9rem;
+				font-weight: 900;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.person-email {
+				overflow: hidden;
+				margin-top: 3px;
+				color: var(--text-muted);
+				font-size: 0.75rem;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.role-badge {
+				display: inline-flex;
+				align-items: center;
+				min-height: 25px;
+				padding: 0 8px;
+				border-radius: 999px;
+				color: #aaa0ff;
+				background: rgba(124, 104, 255, 0.13);
+				font-size: 0.67rem;
+				font-weight: 900;
+				letter-spacing: 0.04em;
+				text-transform: uppercase;
+			}
+
+			.role-badge.is-user {
+				color: #77aaff;
+				background: rgba(58, 140, 255, 0.12);
+			}
+
+			.create-group {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: 10px;
+				margin-bottom: 14px;
+			}
+
+			.group-list {
+				display: grid;
+				gap: 10px;
+			}
+
+			details.group-card {
+				overflow: hidden;
+				border: 1px solid var(--border);
+				border-radius: var(--radius-md);
+				background: var(--surface-2);
+			}
+
+			summary {
+				list-style: none;
+			}
+
+			summary::-webkit-details-marker {
+				display: none;
+			}
+
+			.group-summary {
+				display: grid;
+				grid-template-columns: auto minmax(0, 1fr) auto;
+				align-items: center;
+				gap: 12px;
+				min-height: 64px;
+				padding: 14px;
+				cursor: pointer;
+				background: #11151c;
+				user-select: none;
+			}
+
+			.chevron {
+				width: 9px;
+				height: 9px;
+				border-right: 2px solid var(--text-soft);
+				border-bottom: 2px solid var(--text-soft);
+				transform: rotate(45deg);
+				transition: transform 180ms ease;
+			}
+
+			details[open] .chevron {
+				transform: rotate(225deg) translate(-2px, -2px);
+			}
+
+			.group-heading {
+				min-width: 0;
+			}
+
+			.group-title-line {
+				display: flex;
+				align-items: center;
+				gap: 9px;
+				min-width: 0;
+			}
+
+			.group-title {
+				overflow: hidden;
+				margin: 0;
+				font-size: 0.98rem;
+				font-weight: 900;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.group-count {
+				color: var(--text-muted);
+				font-size: 0.74rem;
+				font-weight: 800;
+			}
+
+			.group-body {
+				padding: 14px;
+				border-top: 1px solid var(--border-soft);
+			}
+
+			.group-body-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 14px;
+				margin-bottom: 12px;
+			}
+
+			.subheading {
+				margin: 0;
+				font-size: 0.86rem;
+				font-weight: 900;
+			}
+
+			.member-list {
+				margin-bottom: 12px;
+			}
+
+			.remove-member {
+				min-height: 34px;
+				padding-inline: 11px;
+				font-size: 0.75rem;
+			}
+
+			.group-footer {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 14px;
+				padding-top: 12px;
+				border-top: 1px solid var(--border-soft);
+			}
+
+			.delete-note {
+				max-width: 430px;
+				margin: 0;
+				color: var(--text-muted);
+				font-size: 0.74rem;
+				line-height: 1.45;
+			}
+
+			.empty-state {
+				margin-bottom: 12px;
+				padding: 16px;
+				border: 1px dashed #3c4554;
+				border-radius: 11px;
+				color: var(--text-muted);
+				background: rgba(255, 255, 255, 0.015);
+				text-align: center;
+				font-size: 0.8rem;
+			}
+
+			/* Modal sem JavaScript */
+			.modal-toggle {
+				position: fixed;
+				width: 1px;
+				height: 1px;
+				opacity: 0;
+				pointer-events: none;
+			}
+
+			.modal-backdrop {
+				position: fixed;
+				inset: 0;
+				z-index: 50;
+				display: none;
+				place-items: center;
+				padding: 18px;
+				background: rgba(4, 6, 10, 0.76);
+				backdrop-filter: blur(8px);
+			}
+
+			.modal-toggle:checked + .modal-backdrop {
+				display: grid;
+			}
+
+			.modal {
+				width: min(100%, 560px);
+				max-height: min(780px, calc(100vh - 36px));
+				overflow: hidden;
+				border: 1px solid #3b4350;
+				border-radius: 18px;
+				background: var(--surface);
+				box-shadow: 0 30px 100px rgba(0, 0, 0, 0.6);
+			}
+
+			.modal-header {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 14px;
+				padding: 18px;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.modal-title {
+				margin: 0;
+				font-size: 1.05rem;
+				font-weight: 900;
+				letter-spacing: -0.02em;
+			}
+
+			.modal-description {
+				margin: 4px 0 0;
+				color: var(--text-muted);
+				font-size: 0.77rem;
+				line-height: 1.4;
+			}
+
+			.close-modal {
+				display: grid;
+				place-items: center;
+				width: 34px;
+				height: 34px;
+				flex: 0 0 auto;
+				border: 1px solid var(--border);
+				border-radius: 10px;
+				color: var(--text-muted);
+				background: var(--surface-3);
+				font-size: 1.2rem;
+			}
+
+			.modal-search {
+				padding: 14px 18px 10px;
+			}
+
+			.selection-tools {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 12px;
+				padding: 0 18px 10px;
+			}
+
+			.selected-count {
+				color: var(--text-muted);
+				font-size: 0.74rem;
+				font-weight: 800;
+			}
+
+			.select-all {
+				color: #aaa0ff;
+				font-size: 0.74rem;
+				font-weight: 900;
+			}
+
+			.candidate-list {
+				display: grid;
+				gap: 8px;
+				max-height: 370px;
+				overflow: auto;
+				padding: 0 18px 16px;
+				scrollbar-width: thin;
+				scrollbar-color: #3b4350 transparent;
+			}
+
+			.candidate {
+				display: grid;
+				grid-template-columns: auto minmax(0, 1fr);
+				align-items: center;
+				gap: 11px;
+				padding: 12px;
+				border: 1px solid var(--border-soft);
+				border-radius: 12px;
+				background: #11151c;
+				cursor: pointer;
+			}
+
+			.candidate:hover {
+				border-color: #444d5c;
+				background: #141922;
+			}
+
+			.candidate input {
+				width: 18px;
+				height: 18px;
+				accent-color: var(--purple);
+			}
+
+			.modal-footer {
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				gap: 9px;
+				padding: 14px 18px 18px;
+				border-top: 1px solid var(--border);
+				background: #10131a;
+			}
+
+			@media (max-width: 760px) {
+				.page-shell {
+					width: min(100% - 18px, 620px);
+					padding-top: 16px;
+				}
+
+				.app-header {
+					align-items: flex-start;
+					margin-bottom: 16px;
+				}
+
+				.brand-title {
+					font-size: 1.62rem;
+				}
+
+				.account {
+					padding-left: 10px;
+				}
+
+				.account-name {
+					display: none;
+				}
+
+				.panel-header {
+					padding: 17px 15px 14px;
+				}
+
+				.panel-body {
+					padding: 0 15px 15px;
+				}
+
+				.toolbar,
+				.create-group {
+					grid-template-columns: 1fr;
+				}
+
+				.user-row {
+					grid-template-columns: minmax(0, 1fr) auto;
+				}
+
+				.user-row .button {
+					grid-column: 1 / -1;
+				}
+
+				.member-row {
+					grid-template-columns: minmax(0, 1fr) auto;
+				}
+
+				.member-row .remove-member {
+					grid-column: 1 / -1;
+				}
+
+				.group-footer {
+					align-items: stretch;
+					flex-direction: column;
+				}
+
+				.group-footer .button {
+					width: 100%;
+				}
+			}
+
+			@media (max-width: 460px) {
+				.page-shell {
+					width: min(100% - 12px, 620px);
+				}
+
+				.app-header {
+					padding: 0 3px;
+				}
+
+				.brand-eyebrow {
+					display: none;
+				}
+
+				.brand-title {
+					font-size: 1.45rem;
+				}
+
+				.logout-button {
+					padding-inline: 10px;
+				}
+
+				.panel-title {
+					font-size: 1rem;
+				}
+
+				.group-summary {
+					grid-template-columns: auto minmax(0, 1fr);
+				}
+
+				.group-summary > .button {
+					grid-column: 1 / -1;
+				}
+
+				.group-body-header {
+					align-items: stretch;
+					flex-direction: column;
+				}
+
+				.group-body-header .button,
+				.group-body-header label {
+					width: 100%;
+					text-align: center;
+				}
+
+				.modal-backdrop {
+					padding: 0;
+					align-items: end;
+				}
+
+				.modal {
+					width: 100%;
+					max-height: 92vh;
+					border-radius: 18px 18px 0 0;
+				}
+
+				.candidate-list {
+					max-height: 48vh;
+				}
+
+				.modal-footer {
+					position: sticky;
+					bottom: 0;
+				}
+
+				.modal-footer .button {
+					flex: 1;
+				}
+			}
+		</style>
+		<script src="js/app.js" defer></script>
+	</head>
+
+	<body>
+		<main class="page-shell">
+			<header class="app-header">
+				<div class="brand-block">
+					<p class="brand-eyebrow">Painel administrativo</p>
+					<h1 class="brand-title">Oracle Board Manager</h1>
+				</div>
+
+				<div class="account">
+					<span class="account-name">LvFarias</span>
+					<button class="logout-button" type="button">Logout</button>
+				</div>
+			</header>
+
+			<nav class="tabs" aria-label="Navegação principal">
+				<button class="tab" type="button" onclick="goTo('painel-user')">Meus grupos</button>
+				<button class="tab is-active" type="button" onclick="goTo('painel-admin')">Admin</button>
+			</nav>
+
+			<div class="admin-stack">
+				<section class="panel">
+					<header class="panel-header">
+						<div>
+							<h2 class="panel-title">Usuários</h2>
+							<p class="panel-description">
+								Altere permissões e gerencie quem possui acesso
+								administrativo.
+							</p>
+						</div>
+
+						<span class="count-pill">4 usuários</span>
+					</header>
+
+					<div class="panel-body">
+						<div class="toolbar">
+							<input
+								class="search-field"
+								type="search"
+								placeholder="Buscar por nome ou e-mail..."
+								aria-label="Buscar usuários"
+							/>
+
+							<button class="button is-secondary" type="button">
+								Filtros
+							</button>
+						</div>
+
+						<div class="user-list">
+							<article class="user-row">
+								<div class="person">
+									<div class="person-name-line">
+										<span class="person-name">Test</span>
+										<span class="role-badge">Admin</span>
+									</div>
+									<div class="person-email">
+										test@example.com
+									</div>
+								</div>
+
+								<select
+									class="role-select"
+									aria-label="Função de Test"
+								>
+									<option selected>Admin</option>
+									<option>User</option>
+								</select>
+
+								<button
+									class="button is-danger-ghost"
+									type="button"
+								>
+									Remover
+								</button>
+							</article>
+
+							<article class="user-row">
+								<div class="person">
+									<div class="person-name-line">
+										<span class="person-name"
+											>Ana Silva</span
+										>
+										<span class="role-badge is-user"
+											>User</span
+										>
+									</div>
+									<div class="person-email">
+										ana@example.com
+									</div>
+								</div>
+
+								<select
+									class="role-select"
+									aria-label="Função de Ana Silva"
+								>
+									<option>Admin</option>
+									<option selected>User</option>
+								</select>
+
+								<button
+									class="button is-danger-ghost"
+									type="button"
+								>
+									Remover
+								</button>
+							</article>
+
+							<article class="user-row">
+								<div class="person">
+									<div class="person-name-line">
+										<span class="person-name"
+											>Carlos Souza</span
+										>
+										<span class="role-badge is-user"
+											>User</span
+										>
+									</div>
+									<div class="person-email">
+										carlos@example.com
+									</div>
+								</div>
+
+								<select
+									class="role-select"
+									aria-label="Função de Carlos Souza"
+								>
+									<option>Admin</option>
+									<option selected>User</option>
+								</select>
+
+								<button
+									class="button is-danger-ghost"
+									type="button"
+								>
+									Remover
+								</button>
+							</article>
+
+							<article class="user-row">
+								<div class="person">
+									<div class="person-name-line">
+										<span class="person-name"
+											>Marina Lima</span
+										>
+										<span class="role-badge is-user"
+											>User</span
+										>
+									</div>
+									<div class="person-email">
+										marina@example.com
+									</div>
+								</div>
+
+								<select
+									class="role-select"
+									aria-label="Função de Marina Lima"
+								>
+									<option>Admin</option>
+									<option selected>User</option>
+								</select>
+
+								<button
+									class="button is-danger-ghost"
+									type="button"
+								>
+									Remover
+								</button>
+							</article>
+						</div>
+					</div>
+				</section>
+
+				<section class="panel">
+					<header class="panel-header">
+						<div>
+							<h2 class="panel-title">Grupos</h2>
+							<p class="panel-description">
+								Crie grupos e controle quais usuários podem
+								visualizar e editar cada um.
+							</p>
+						</div>
+
+						<span class="count-pill">3 grupos</span>
+					</header>
+
+					<div class="panel-body">
+						<form class="create-group">
+							<input
+								class="text-field"
+								type="text"
+								placeholder="Nome do novo grupo"
+								aria-label="Nome do novo grupo"
+							/>
+
+							<button class="button is-primary" type="button">
+								Criar grupo
+							</button>
+						</form>
+
+						<div class="group-list">
+							<details class="group-card" open>
+								<summary class="group-summary">
+									<span
+										class="chevron"
+										aria-hidden="true"
+									></span>
+
+									<div class="group-heading">
+										<div class="group-title-line">
+											<h3 class="group-title">Wonky</h3>
+										</div>
+										<div class="group-count">
+											2 usuários com acesso
+										</div>
+									</div>
+
+									<button
+										class="button is-danger"
+										type="button"
+										disabled
+									>
+										Excluir grupo
+									</button>
+								</summary>
+
+								<div class="group-body">
+									<div class="group-body-header">
+										<h4 class="subheading">
+											Usuários com acesso
+										</h4>
+
+										<label
+											class="button is-primary"
+											for="add-users-modal"
+										>
+											+ Adicionar usuários
+										</label>
+									</div>
+
+									<div class="member-list">
+										<article class="member-row">
+											<div class="person">
+												<div class="person-name-line">
+													<span class="person-name"
+														>Test</span
+													>
+												</div>
+												<div class="person-email">
+													test@example.com
+												</div>
+											</div>
+
+											<span class="role-badge"
+												>Admin</span
+											>
+
+											<button
+												class="button is-danger-ghost remove-member"
+												type="button"
+											>
+												Remover do grupo
+											</button>
+										</article>
+
+										<article class="member-row">
+											<div class="person">
+												<div class="person-name-line">
+													<span class="person-name"
+														>Ana Silva</span
+													>
+												</div>
+												<div class="person-email">
+													ana@example.com
+												</div>
+											</div>
+
+											<span class="role-badge is-user"
+												>User</span
+											>
+
+											<button
+												class="button is-danger-ghost remove-member"
+												type="button"
+											>
+												Remover do grupo
+											</button>
+										</article>
+									</div>
+
+									<footer class="group-footer">
+										<p class="delete-note">
+											Remova todos os usuários antes de
+											excluir este grupo.
+										</p>
+
+										<button
+											class="button is-danger"
+											type="button"
+											disabled
+										>
+											Excluir grupo
+										</button>
+									</footer>
+								</div>
+							</details>
+
+							<details class="group-card">
+								<summary class="group-summary">
+									<span
+										class="chevron"
+										aria-hidden="true"
+									></span>
+
+									<div class="group-heading">
+										<div class="group-title-line">
+											<h3 class="group-title">
+												Majestics
+											</h3>
+										</div>
+										<div class="group-count">
+											1 usuário com acesso
+										</div>
+									</div>
+
+									<button
+										class="button is-danger"
+										type="button"
+										disabled
+									>
+										Excluir grupo
+									</button>
+								</summary>
+
+								<div class="group-body">
+									<div class="group-body-header">
+										<h4 class="subheading">
+											Usuários com acesso
+										</h4>
+
+										<label
+											class="button is-primary"
+											for="add-users-modal"
+										>
+											+ Adicionar usuários
+										</label>
+									</div>
+
+									<div class="member-list">
+										<article class="member-row">
+											<div class="person">
+												<div class="person-name-line">
+													<span class="person-name"
+														>Test</span
+													>
+												</div>
+												<div class="person-email">
+													test@example.com
+												</div>
+											</div>
+
+											<span class="role-badge"
+												>Admin</span
+											>
+
+											<button
+												class="button is-danger-ghost remove-member"
+												type="button"
+											>
+												Remover do grupo
+											</button>
+										</article>
+									</div>
+
+									<footer class="group-footer">
+										<p class="delete-note">
+											Remova todos os usuários antes de
+											excluir este grupo.
+										</p>
+
+										<button
+											class="button is-danger"
+											type="button"
+											disabled
+										>
+											Excluir grupo
+										</button>
+									</footer>
+								</div>
+							</details>
+
+							<details class="group-card">
+								<summary class="group-summary">
+									<span
+										class="chevron"
+										aria-hidden="true"
+									></span>
+
+									<div class="group-heading">
+										<div class="group-title-line">
+											<h3 class="group-title">BN</h3>
+										</div>
+										<div class="group-count">
+											Nenhum usuário
+										</div>
+									</div>
+
+									<button
+										class="button is-danger"
+										type="button"
+									>
+										Excluir grupo
+									</button>
+								</summary>
+
+								<div class="group-body">
+									<div class="group-body-header">
+										<h4 class="subheading">
+											Usuários com acesso
+										</h4>
+
+										<label
+											class="button is-primary"
+											for="add-users-modal"
+										>
+											+ Adicionar usuários
+										</label>
+									</div>
+
+									<div class="empty-state">
+										Este grupo ainda não possui usuários.
+									</div>
+
+									<footer class="group-footer">
+										<p class="delete-note">
+											Como o grupo está vazio, ele já pode
+											ser excluído.
+										</p>
+
+										<button
+											class="button is-danger"
+											type="button"
+										>
+											Excluir grupo
+										</button>
+									</footer>
+								</div>
+							</details>
+						</div>
+					</div>
+				</section>
+			</div>
+		</main>
+
+		<!-- Modal CSS-only para preview -->
+		<input
+			class="modal-toggle"
+			id="add-users-modal"
+			type="checkbox"
+			aria-hidden="true"
+		/>
+
+		<div class="modal-backdrop">
+			<section
+				class="modal"
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="modal-title"
+			>
+				<header class="modal-header">
+					<div>
+						<h2 class="modal-title" id="modal-title">
+							Adicionar usuários ao grupo Wonky
+						</h2>
+						<p class="modal-description">
+							Selecione uma ou mais pessoas que ainda não fazem
+							parte do grupo.
+						</p>
+					</div>
+
+					<label
+						class="close-modal"
+						for="add-users-modal"
+						aria-label="Fechar modal"
+					>
+						×
+					</label>
+				</header>
+
+				<div class="modal-search">
+					<input
+						class="search-field"
+						type="search"
+						placeholder="Buscar por nome ou e-mail..."
+						aria-label="Buscar usuários disponíveis"
+					/>
+				</div>
+
+				<div class="selection-tools">
+					<span class="selected-count">2 usuários selecionados</span>
+					<label class="select-all">
+						<input type="checkbox" />
+						Selecionar todos
+					</label>
+				</div>
+
+				<div class="candidate-list">
+					<label class="candidate">
+						<input type="checkbox" checked />
+						<span class="person">
+							<span class="person-name">Carlos Souza</span>
+							<span class="person-email">carlos@example.com</span>
+						</span>
+					</label>
+
+					<label class="candidate">
+						<input type="checkbox" />
+						<span class="person">
+							<span class="person-name">Marina Lima</span>
+							<span class="person-email">marina@example.com</span>
+						</span>
+					</label>
+
+					<label class="candidate">
+						<input type="checkbox" checked />
+						<span class="person">
+							<span class="person-name">Pedro Almeida</span>
+							<span class="person-email">pedro@example.com</span>
+						</span>
+					</label>
+
+					<label class="candidate">
+						<input type="checkbox" />
+						<span class="person">
+							<span class="person-name">Bianca Rocha</span>
+							<span class="person-email">bianca@example.com</span>
+						</span>
+					</label>
+
+					<label class="candidate">
+						<input type="checkbox" />
+						<span class="person">
+							<span class="person-name">Lucas Mendes</span>
+							<span class="person-email">lucas@example.com</span>
+						</span>
+					</label>
+
+					<label class="candidate">
+						<input type="checkbox" />
+						<span class="person">
+							<span class="person-name">Fernanda Costa</span>
+							<span class="person-email"
+								>fernanda@example.com</span
+							>
+						</span>
+					</label>
+				</div>
+
+				<footer class="modal-footer">
+					<label class="button is-secondary" for="add-users-modal">
+						Cancelar
+					</label>
+
+					<button class="button is-primary" type="button">
+						Adicionar 2 usuários
+					</button>
+				</footer>
+			</section>
+		</div>
+	</body>
+</html>

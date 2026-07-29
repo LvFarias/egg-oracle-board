@@ -1,0 +1,12 @@
+# Local Netlify
+.netlify
+deno.lock
+
+# node_modules
+node_modules
+
+# npm
+package-lock.json
+
+# envs
+.env

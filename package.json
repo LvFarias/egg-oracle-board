@@ -1,0 +1,22 @@
+{
+  "name": "the-oracle-board",
+  "version": "4.0.0",
+  "description": "Calculates the contract prediction leaderboard on Discord.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LvFarias/egg-oracle-board.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/LvFarias/egg-oracle-board/issues"
+  },
+  "homepage": "https://github.com/LvFarias/egg-oracle-board#readme",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.111.0"
+  }
+}
